@@ -1,0 +1,673 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"><title>Vecinos · Ruta</title><link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
+:root{--gd:#3d5a40;--gm:#5a8e7d;--gl:#cdece2;--gp:#ccdcd6;--ol:#7a9645;--ch:#2a2a2a;--or:#f4a259;--pc:#ffdeb6;--bg:#f4f7f4;--wsp:#075E54}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+html,body{width:100%;overflow-x:hidden}
+body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);padding-bottom:100px;font-size:18px;line-height:1.4}
+.hdr{background:var(--gd);padding:14px 18px 12px;position:sticky;top:0;z-index:100;box-shadow:0 3px 16px rgba(40,70,42,.35)}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.logo img{height:44px;object-fit:contain}
+.dbadge{background:rgba(255,255,255,.15);padding:7px 14px;border-radius:22px;font-size:14px;color:white;font-weight:600}
+.pbar-wrap{background:rgba(255,255,255,.2);border-radius:10px;height:8px;overflow:hidden}
+.pbar{background:var(--or);height:100%;border-radius:10px;transition:width .5s}
+.ptxt{font-size:14px;color:rgba(255,255,255,.8);margin-top:6px;text-align:right;font-weight:600}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;color:var(--gm)}
+.loading .spin{width:48px;height:48px;border:4px solid var(--gp);border-top-color:var(--gm);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:16px;font-weight:600}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px}
+.sc{background:white;border-radius:18px;padding:20px 12px;text-align:center;box-shadow:0 2px 10px rgba(60,90,60,.1)}
+.sc .n{font-size:44px;font-weight:700;color:var(--gm);line-height:1}
+.sc .l{font-size:13px;color:var(--gd);margin-top:6px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.slist{padding:0 14px 14px;display:flex;flex-direction:column;gap:14px}
+.scard{background:white;border-radius:20px;box-shadow:0 3px 14px rgba(60,90,60,.13);overflow:hidden;border-left:7px solid var(--gm)}
+.scard.done{border-left-color:var(--ol);opacity:.55}
+.scard.t-rec{border-left-color:var(--or)}
+.shdr{display:flex;align-items:center;padding:18px 16px;gap:16px;cursor:pointer;min-height:90px}
+.snum{width:50px;height:50px;border-radius:50%;background:var(--gl);color:var(--gd);font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.scard.done .snum{background:var(--ol);color:white}
+.scard.t-rec .snum{background:var(--pc)}
+.sinfo{flex:1;min-width:0}
+.stag{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:4px 12px;border-radius:14px;display:inline-block;margin-bottom:6px}
+.tt{background:var(--gl);color:var(--gd)}.te{background:#d4edda;color:#1a5e2e}.tr{background:var(--pc);color:#7a4500}
+.sname{font-weight:800;font-size:22px;color:var(--ch);line-height:1.2}
+.saddr{font-size:15px;color:var(--gm);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.sact{display:flex;gap:10px;flex-shrink:0}
+.bic{width:54px;height:54px;border-radius:15px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700}
+.bic:active{transform:scale(.88)}
+.bm{background:var(--gl);color:var(--gd)}.bc{background:var(--pc)}.bd{background:var(--gp);color:var(--gd)}.bd.on{background:var(--ol);color:white}
+.sbody{display:none;padding:0 18px 18px;border-top:2px solid var(--bg)}
+.sbody.open{display:block}
+.ptitle{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--gm);font-weight:800;margin:16px 0 10px}
+.pitem{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px dashed var(--gp);font-size:17px}
+.pitem:last-child{border-bottom:none}
+.pqty{font-weight:800;color:var(--gm);font-size:16px;background:var(--gl);padding:5px 14px;border-radius:14px}
+.nbox{background:var(--pc);border-radius:14px;padding:14px 16px;margin-top:14px;font-size:16px;line-height:1.6}
+.nbox strong{display:block;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#7a4500;margin-bottom:5px;font-weight:800}
+.clirow{background:var(--bg);border-radius:14px;padding:14px 16px;margin-top:14px;border-left:5px solid var(--gm)}
+.clirow-name{font-weight:800;font-size:19px}
+.clirow-ph{font-size:16px;color:var(--gm);margin-top:5px}
+.clwrap{padding:14px}
+.clprog{background:white;border-radius:18px;padding:18px 20px;margin-bottom:16px;box-shadow:0 2px 10px rgba(60,90,60,.1)}
+.clprog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.clprog-lbl{font-size:18px;font-weight:700;color:var(--gd)}.clprog-cnt{font-size:28px;font-weight:800;color:var(--ol)}
+.clpb{background:var(--gp);border-radius:10px;height:10px;overflow:hidden}
+.clpbf{background:var(--ol);height:100%;border-radius:10px;transition:width .3s}
+.cli{background:white;border-radius:18px;padding:20px 18px;margin-bottom:12px;display:flex;align-items:flex-start;gap:18px;box-shadow:0 2px 10px rgba(60,90,60,.1);cursor:pointer;min-height:78px}
+.cli.ck{opacity:.4}
+.ccirc{width:36px;height:36px;border-radius:50%;border:3px solid var(--gp);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-top:3px;font-weight:800;color:transparent}
+.cli.ck .ccirc{background:var(--ol);border-color:var(--ol);color:white}
+.prod-list{margin-top:6px;display:flex;flex-direction:column;gap:3px}
+.prod-row{display:flex;align-items:center;gap:6px;font-size:13px;padding:3px 0;border-bottom:1px solid #f0f0f0}
+.prod-qty{font-weight:700;color:var(--gd);min-width:36px;flex-shrink:0}
+.prod-nom{flex:1;color:#333}
+.prod-edit,.prod-del{border:none;border-radius:8px;padding:3px 8px;font-size:13px;cursor:pointer;flex-shrink:0}
+.prod-edit{background:#e8f4e8;color:var(--gd)}
+.prod-del{background:#fde8e8;color:#c0392b}
+.ctxt{font-size:18px;color:var(--ch);line-height:1.5;flex:1}
+.ctxt strong{font-size:20px;display:block;margin-bottom:3px;font-weight:800}
+.ctxt small{font-size:14px;display:block;margin-top:4px;color:var(--gm);font-weight:500}
+.ctxt .det{font-size:13px;display:block;margin-top:4px;color:#999}
+/* KM */
+.km-wrap{padding:14px}
+.km-card{background:white;border-radius:22px;padding:26px;box-shadow:0 3px 14px rgba(60,90,60,.12);margin-bottom:18px}
+.km-ttl{font-size:15px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-bottom:22px}
+.km-ttl.s{color:var(--wsp)}.km-ttl.e{color:var(--gd)}
+.km-lbl{font-size:18px;font-weight:700;color:var(--gd);margin-bottom:14px;display:block}
+.km-in{padding:22px 18px;border:3px solid var(--gp);border-radius:18px;font-family:'Readex Pro',sans-serif;font-size:44px;font-weight:800;color:var(--ch);width:100%;background:var(--bg);text-align:center;margin-bottom:22px;letter-spacing:4px}
+.km-in:focus{outline:none;border-color:var(--gm);background:white}
+.km-in::placeholder{font-size:26px;font-weight:400;letter-spacing:0;color:#ccc}
+.km-diff{background:var(--gl);border-radius:16px;padding:18px;text-align:center;margin-bottom:22px;display:none}
+.km-diff-n{font-size:40px;font-weight:800;color:var(--gd)}.km-diff-l{font-size:15px;color:var(--gm);margin-top:5px;font-weight:600}
+.wbtn{width:100%;padding:22px;border:none;border-radius:18px;font-family:'Readex Pro',sans-serif;font-weight:800;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:transform .15s}
+.wbtn:active{transform:scale(.95)}.wbtn:disabled{opacity:.25;cursor:not-allowed}
+.wbtn.s{background:var(--wsp);color:white}.wbtn.e{background:var(--gd);color:white}
+.km-hint{font-size:14px;color:var(--gm);text-align:center;margin-top:14px;line-height:1.6;font-weight:500}
+.km-sent{display:none;background:var(--gl);border-radius:16px;padding:18px;text-align:center;font-size:18px;font-weight:700;color:var(--gd);margin-top:16px}
+/* MISIONES */
+.m-scr{padding:14px}
+.m-banner{background:var(--or);border-radius:18px;padding:16px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.m-banner .ico{font-size:28px;flex-shrink:0}
+.m-banner-txt{font-size:15px;font-weight:700;color:white;line-height:1.4}
+.ms-prog{background:white;border-radius:16px;padding:16px 18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(60,90,60,.1)}
+.ms-prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ms-prog-lbl{font-size:16px;font-weight:700;color:var(--gd)}.ms-prog-cnt{font-size:24px;font-weight:800;color:var(--or)}
+.ms-pb{background:var(--gp);border-radius:8px;height:8px;overflow:hidden}
+.ms-pbf{background:var(--or);height:100%;border-radius:8px;transition:width .3s}
+.ms-card{background:white;border-radius:20px;padding:20px;margin-bottom:12px;box-shadow:0 3px 14px rgba(60,90,60,.13);border-left:7px solid var(--or)}
+.ms-card.done{border-left-color:var(--ol);opacity:.5}
+.ms-top{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.ms-num{width:46px;height:46px;border-radius:50%;background:var(--pc);color:var(--ch);font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ms-card.done .ms-num{background:var(--ol);color:white}
+.ms-name{font-weight:800;font-size:20px;color:var(--ch)}
+.ms-mision{font-size:16px;color:var(--ch);line-height:1.6;margin-bottom:10px;background:var(--bg);border-radius:12px;padding:12px 14px}
+.ms-prods{font-size:14px;color:var(--gm);line-height:1.7;background:var(--gl);border-radius:10px;padding:10px 14px;margin-bottom:10px}
+.ms-prods strong{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--gd);margin-bottom:4px}
+.ms-actions{display:flex;gap:10px}
+.ms-map{flex:1;padding:14px;border:none;border-radius:14px;background:var(--gl);color:var(--gd);font-family:'Readex Pro',sans-serif;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.ms-ok{width:56px;height:56px;border-radius:14px;border:none;background:var(--gp);color:var(--gd);font-size:20px;font-weight:800;cursor:pointer;flex-shrink:0}
+.ms-ok.on{background:var(--ol);color:white}
+.ms-empty{text-align:center;padding:40px 20px;color:#aaa;font-size:16px;font-weight:500}
+/* RESUMEN */
+.rwrap{padding:14px}
+.rsec{background:white;border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(60,90,60,.1)}
+.rsec h3{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--gm);margin-bottom:14px}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:14px 0;font-size:18px;border-bottom:1px dashed var(--gp)}
+.trow:last-child{border-bottom:none}.trow .v{font-weight:800;color:var(--gm)}
+.trow.pago{background:var(--gl);border-radius:14px;padding:14px 16px;margin-top:8px;border-bottom:none}
+.trow.pago .v{color:var(--gd);font-size:22px}
+/* NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:2px solid var(--gp);padding:10px 4px 20px;display:flex;justify-content:space-around;box-shadow:0 -5px 24px rgba(60,90,60,.13);z-index:100}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;color:#888;font-family:'Readex Pro',sans-serif;font-size:11px;font-weight:700;padding:8px 10px;border-radius:16px;min-width:58px}
+.nb.active{background:var(--gl);color:var(--gd)}.nb .ico{font-size:24px}
+.scr{display:none}.scr.active{display:block}
+.stitle{padding:14px 16px 6px;font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--gd)}
+.home-stat{background:white;border-radius:18px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(60,90,60,.1);cursor:pointer;transition:transform .1s}.home-stat:active{transform:scale(.95)}.home-stat-n{font-size:32px;font-weight:900;color:var(--ch)}.home-stat-l{font-size:13px;color:var(--gm);font-weight:600;margin-top:4px}.home-mis-item{background:white;border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(60,90,60,.08)}.home-mis-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.toast{position:fixed;top:86px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--gd);color:white;padding:14px 30px;border-radius:36px;font-size:16px;font-weight:700;opacity:0;transition:all .25s;z-index:200;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style></head><body><div class="toast" id="t"></div>
+<div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200;background:#bd4a52;color:white;text-align:center;padding:7px 14px;font-size:13px;font-weight:700;letter-spacing:.3px">
+  📵 Sin conexión — los cambios se guardarán al reconectar
+</div><div class="hdr"><div class="hdr-top"><div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_2.png?v=1772739099" alt="Vecinos"></div><div class="dbadge" id="fechaBadge">Cargando...</div></div><div class="pbar-wrap"><div class="pbar" id="pb" style="width:0%"></div></div><div class="ptxt" id="pt">Cargando...</div></div><div class="scr active" id="scr-home"><div style="padding:20px 16px"><div style="text-align:center;margin-bottom:24px"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_2.png?v=1772739099" style="height:60px;margin-bottom:10px"><br><div style="font-size:19px;font-weight:800;color:var(--ch)" id="home-fecha">Cargando...</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px"><div class="home-stat" onclick="showScr('mis')"><div class="home-stat-n" id="hsMis">-</div><div class="home-stat-l">Misiones</div></div><div class="home-stat" onclick="showScr('carga')"><div class="home-stat-n" id="hsCarga">-</div><div class="home-stat-l">Carga</div></div><div class="home-stat" onclick="showScr('ruta')"><div class="home-stat-n" id="hsParadas">-</div><div class="home-stat-l">Entregas</div></div><div class="home-stat" onclick="showScr('km')"><div class="home-stat-n">&#128207;</div><div class="home-stat-l">Km</div></div></div><div id="home-misiones-list"></div></div></div>
+<div class="scr" id="scr-km"><div class="km-wrap"><div class="km-card"><div class="km-ttl s">Inicio de ruta</div><label class="km-lbl">Odometro al salir</label><input type="number" class="km-in" id="kmI" placeholder="000000" inputmode="numeric"><button class="wbtn s" id="btnI" disabled>Enviar km inicio por WhatsApp</button><div class="km-hint">Adjunta la foto del odometro en el mensaje</div><div class="km-sent" id="sentI">&#10003; Km inicio enviado</div></div><div class="km-card"><div class="km-ttl e">Fin de ruta</div><label class="km-lbl">Odometro al llegar</label><input type="number" class="km-in" id="kmF" placeholder="000000" inputmode="numeric"><div class="km-diff" id="kmDiff"><div class="km-diff-n" id="kmDiffN">-</div><div class="km-diff-l">km recorridos hoy</div></div><button class="wbtn e" id="btnF" disabled>Enviar km final por WhatsApp</button><div class="km-hint">Adjunta la foto del odometro en el mensaje</div><div class="km-sent" id="sentF">&#10003; Km final enviado</div></div></div></div><div class="scr" id="scr-mis"><div class="m-scr"><div class="m-banner"><div class="ico">&#127937;</div><div class="m-banner-txt">Completa las misiones antes de iniciar las entregas</div></div><div class="ms-prog"><div class="ms-prog-top"><span class="ms-prog-lbl">Completadas</span><span class="ms-prog-cnt" id="msCnt">0/0</span></div><div class="ms-pb"><div class="ms-pbf" id="msPbf" style="width:0%"></div></div></div><div id="ms-list"><div class="ms-empty">Cargando misiones...</div></div></div></div><div class="scr" id="scr-carga"><div class="clwrap"><div class="stitle" style="padding:14px 2px 16px">Lista de carga</div><div class="clprog"><div class="clprog-top"><span class="clprog-lbl">Verificados</span><span class="clprog-cnt" id="clcnt">0/0</span></div><div class="clpb"><div class="clpbf" id="clpbf" style="width:0%"></div></div></div><div id="clist"></div></div></div><div class="scr" id="scr-ruta"><div id="loading-ruta" class="loading"><div class="spin"></div><p>Cargando ruta...</p></div><div id="error-ruta" style="display:none;background:white;border-radius:18px;padding:24px;margin:16px;text-align:center"><h3 style="color:#c0392b;font-size:18px;margin-bottom:8px">No se pudo cargar</h3><p style="font-size:15px;color:var(--gm);margin-bottom:16px"></p><button style="background:var(--gd);color:white;border:none;padding:14px 28px;border-radius:14px;font-family:Readex Pro,sans-serif;font-size:16px;font-weight:700;cursor:pointer" onclick="loadData()">Reintentar</button></div><div id="content-ruta" style="display:none"><div class="sum"><div class="sc"><div class="n" id="sTotal">0</div><div class="l">Paradas</div></div><div class="sc"><div class="n" id="sProds">0</div><div class="l">Productos</div></div></div><div class="slist" id="slist"></div></div></div><div class="scr" id="scr-res"><div class="rwrap"><div class="stitle" style="padding:14px 2px 16px">Resumen del dia</div><div id="rescont"></div></div></div><div class="bnav"><button class="nb active" id="nb-home"><div class="ico">&#127968;</div>Inicio</button><button class="nb" id="nb-km"><div class="ico">&#128207;</div>Km</button><button class="nb" id="nb-mis"><div class="ico">&#127937;</div>Misiones</button><button class="nb" id="nb-carga"><div class="ico">&#128203;</div>Carga</button><button class="nb" id="nb-ruta"><div class="ico">&#128506;</div>Ruta</button><button class="nb" id="nb-res"><div class="ico">&#128202;</div>Resumen</button></div><script>
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykqQLxkNidUZnmcXADFvUmuuAfvs5rk8eebEL9OG7uh4-6eXGG1e0nc_1oESEG4NvT/exec';
+var WSP = '56975422972';
+var PARADAS = [], FECHA = '', RUTA_ID = '', TOTAL = 0;
+var done = {}, clDone = {}, misionesDone = {}, misionesData = [];
+var prodOverrides = {};
+
+// ── OFFLINE / CACHE ────────────────────────────────────────────────────
+var CACHE_KEY = 'vecinos_cache';
+var QUEUE_KEY = 'vecinos_queue';
+var isOnline = navigator.onLine;
+
+function saveCache() {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      PARADAS: PARADAS, FECHA: FECHA, RUTA_ID: RUTA_ID,
+      done: done, clDone: clDone, misionesDone: misionesDone,
+      misionesData: misionesData, prodOverrides: prodOverrides,
+      kmI: document.getElementById('kmI').value,
+      kmF: document.getElementById('kmF').value,
+      ts: Date.now()
+    }));
+  } catch(e) {}
+}
+
+function loadCache() {
+  try {
+    var raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return false;
+    var c = JSON.parse(raw);
+    // Only use cache if less than 18 hours old
+    if (Date.now() - c.ts > 18 * 3600 * 1000) return false;
+    PARADAS = c.PARADAS || []; FECHA = c.FECHA || ''; RUTA_ID = c.RUTA_ID || '';
+    TOTAL = PARADAS.length;
+    done = c.done || {}; clDone = c.clDone || {};
+    misionesDone = c.misionesDone || {}; misionesData = c.misionesData || [];
+    prodOverrides = c.prodOverrides || {};
+    if (c.kmI) { document.getElementById('kmI').value = c.kmI; document.getElementById('sentI').style.display = 'block'; }
+    if (c.kmF) { document.getElementById('kmF').value = c.kmF; document.getElementById('sentF').style.display = 'block'; }
+    if (c.kmI || c.kmF) document.getElementById('kmI').dispatchEvent(new Event('input'));
+    return true;
+  } catch(e) { return false; }
+}
+
+// Sync queue: operations that failed offline
+function getQueue() {
+  try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); } catch(e) { return []; }
+}
+function addToQueue(payload) {
+  var q = getQueue();
+  q.push(payload);
+  try { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); } catch(e) {}
+}
+function flushQueue() {
+  var q = getQueue();
+  if (!q.length) return;
+  var remaining = [];
+  var sent = 0;
+  function trySend(i) {
+    if (i >= q.length) {
+      if (remaining.length < q.length) {
+        try { localStorage.setItem(QUEUE_KEY, JSON.stringify(remaining)); } catch(e) {}
+        if (sent > 0) showT('\u2713 ' + sent + ' cambio(s) sincronizado(s)');
+      }
+      return;
+    }
+    fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(q[i]) })
+      .then(function() { sent++; trySend(i+1); })
+      .catch(function() { remaining.push(q[i]); trySend(i+1); });
+  }
+  trySend(0);
+}
+
+// Online/offline events
+window.addEventListener('online', function() {
+  isOnline = true;
+  document.getElementById('offline-banner').style.display = 'none';
+  showT('Conexi\u00f3n restaurada — sincronizando...');
+  flushQueue();
+});
+window.addEventListener('offline', function() {
+  isOnline = false;
+  document.getElementById('offline-banner').style.display = 'block';
+  showT('\uD83D\uDCF5 Sin conexi\u00f3n — modo offline');
+});
+if (!isOnline) document.getElementById('offline-banner').style.display = 'block';
+
+// ── GAS GET (with cache fallback) ─────────────────────────────────────
+function gasGet(action, cb) {
+  var url = SCRIPT_URL + '?action=' + action + '&t=' + Date.now();
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) { cb(data); })
+    .catch(function() {
+      // fetch failed — try JSONP
+      var id = 'cb_' + action + '_' + Date.now();
+      var cbDone = false;
+      var timer = setTimeout(function() {
+        if (!cbDone) { cbDone = true; delete window[id]; cb(null); }
+      }, 10000);
+      window[id] = function(data) {
+        if (!cbDone) { cbDone = true; clearTimeout(timer); delete window[id]; cb(data); }
+      };
+      var s = document.createElement('script');
+      s.src = SCRIPT_URL + '?action=' + action + '&callback=' + id + '&t=' + Date.now();
+      s.onerror = function() {
+        if (!cbDone) { cbDone = true; clearTimeout(timer); delete window[id]; cb(null); }
+      };
+      document.head.appendChild(s);
+    });
+}
+
+// ── GAS POST (queue if offline) ───────────────────────────────────────
+function gasPost(payload) {
+  if (!isOnline) {
+    addToQueue(payload);
+    return;
+  }
+  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify(payload) })
+    .catch(function() { addToQueue(payload); });
+}
+
+function updateHome() {
+  document.getElementById('home-fecha').textContent = FECHA || '';
+  var misDoneCount = Object.keys(misionesDone).length;
+  document.getElementById('hsMis').textContent = misionesData.length ? (misDoneCount+'/'+misionesData.length) : '-';
+  document.getElementById('hsParadas').textContent = TOTAL ? (Object.keys(done).length+'/'+TOTAL) : '-';
+  var clTotal = document.getElementById('clcnt') ? (document.getElementById('clcnt').textContent || '-') : '-';
+  document.getElementById('hsCarga').textContent = clTotal;
+  var listEl = document.getElementById('home-misiones-list');
+  if (!misionesData.length) { listEl.innerHTML=''; return; }
+  listEl.innerHTML = '<div style="font-size:13px;font-weight:800;color:var(--gm);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Misiones del día</div>' +
+    misionesData.map(function(m,i){
+      var ok=!!misionesDone[i];
+      return '<div class="home-mis-item" onclick="showScr(\'mis\')">' +
+        '<div class="home-mis-dot" style="background:'+(ok?'var(--ol)':'#bd4a52')+'"></div>' +
+        '<div><div class="home-mis-name">'+(ok?'<s>':'')+m.nombre+(ok?'</s>':'')+'</div>' +
+        '<div style="font-size:12px;color:var(--gm)">'+m.mision+'</div></div></div>';
+    }).join('');
+}
+
+function loadData() {
+  // Show cached data immediately if available
+  var hasCached = loadCache();
+  if (hasCached) {
+    document.getElementById('fechaBadge').textContent = FECHA;
+    document.getElementById('sTotal').textContent = TOTAL;
+    document.getElementById('pt').textContent = Object.keys(done).length + ' de ' + TOTAL + ' paradas';
+    document.getElementById('loading-ruta').style.display = 'none';
+    document.getElementById('content-ruta').style.display = 'block';
+    render(); updateHome(); renderMisiones(); updP();
+    if (!isOnline) return; // offline — use cache only
+    showT('Actualizando...');
+  }
+
+  gasGet('paradas', function(res) {
+    if (!res || !res.ok) {
+      if (!hasCached) {
+        document.getElementById('loading-ruta').style.display = 'none';
+        document.getElementById('error-ruta').style.display = 'block';
+        document.getElementById('error-ruta').querySelector('p').textContent = 'No se pudo cargar la ruta.';
+      }
+      return;
+    }
+    PARADAS = res.paradas; FECHA = res.fecha; RUTA_ID = res.ruta_id; TOTAL = PARADAS.length;
+    gasGet('prodOverrides', function(ovRes) {
+      if(ovRes && ovRes.ok && ovRes.overrides) prodOverrides = ovRes.overrides;
+      applyProdOverrides();
+      PARADAS = PARADAS.filter(function(p){ return !p._deleted; });
+      var customPuntos = {};
+      PARADAS.forEach(function(p) {
+        if(p.tipo === 'punto-retiro') {
+          p.clientes = p.clientes.filter(function(cl) {
+            var ov = prodOverrides[cl.orderNum];
+            if(!ov || !ov.direccion) return true;
+            var newPunto = ov.direccion.trim();
+            if(newPunto === p.nombre) return true;
+            if(!customPuntos[newPunto]) customPuntos[newPunto] = [];
+            customPuntos[newPunto].push({cl:cl, src:p});
+            return false;
+          });
+        } else if(p.tipo === 'entrega') {
+          var ov = prodOverrides['#'+p.id];
+          if(ov && ov.direccion) {
+            var existsAsParada = PARADAS.some(function(pp){ return pp.nombre === ov.direccion; });
+            if(existsAsParada) { p._movedToParada = true; }
+          }
+        }
+      });
+      Object.keys(customPuntos).forEach(function(puntoName) {
+        var existing = PARADAS.find(function(p){ return p.nombre === puntoName; });
+        if(existing) {
+          customPuntos[puntoName].forEach(function(item){ existing.clientes.push(item.cl); });
+        } else {
+          PARADAS.unshift({
+            id: 'custom-'+puntoName.replace(/\s+/g,'-').toLowerCase(),
+            tipo: 'punto-retiro', nombre: puntoName, direccion: puntoName,
+            mapUrl: 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(puntoName),
+            telefono:'', notas:'',
+            clientes: customPuntos[puntoName].map(function(item){ return item.cl; })
+          });
+        }
+      });
+      PARADAS = PARADAS.filter(function(p){ return !p._movedToParada && (p.tipo !== 'punto-retiro' || p.clientes.length > 0); });
+      TOTAL = PARADAS.length;
+      document.getElementById('sTotal').textContent = TOTAL;
+      // Restore done state from Progreso sheet
+      gasGet('stops', function(stRes) {
+        if(stRes && stRes.ok && stRes.stops) {
+          // Merge: keep local done state, add server state
+          Object.keys(stRes.stops).forEach(function(parada_id) {
+            var s = stRes.stops[parada_id];
+            if(s.estado === 'completado') {
+              var idNum = parseInt(parada_id);
+              done[isNaN(idNum) ? parada_id : idNum] = true;
+            }
+          });
+        }
+        document.getElementById('fechaBadge').textContent = FECHA;
+        document.getElementById('pt').textContent = Object.keys(done).length + ' de ' + TOTAL + ' paradas';
+        document.getElementById('loading-ruta').style.display = 'none';
+        document.getElementById('content-ruta').style.display = 'block';
+        // Restore km values
+        gasGet('km', function(kmRes) {
+          if(kmRes && kmRes.ok && kmRes.km) {
+            var km = kmRes.km;
+            if(km.kmInicio && !document.getElementById('kmI').value) {
+              document.getElementById('kmI').value = km.kmInicio;
+              document.getElementById('sentI').style.display = 'block';
+            }
+            if(km.kmFin && !document.getElementById('kmF').value) {
+              document.getElementById('kmF').value = km.kmFin;
+              document.getElementById('sentF').style.display = 'block';
+            }
+            if(km.kmInicio || km.kmFin) document.getElementById('kmI').dispatchEvent(new Event('input'));
+          }
+          saveCache();
+          render(); updateHome();
+        });
+      });
+    });
+  });
+  loadMisiones();
+}
+
+function loadMisiones() {
+  gasGet('misiones', function(res) {
+    misionesData = (res && res.misiones) ? res.misiones : misionesData;
+    misionesDone = (res && res.misionesDone) ? res.misionesDone : misionesDone;
+    renderMisiones(); updateHome(); saveCache();
+  });
+}
+
+// ── RENDER RUTA ──────────────────────────────────────────────────────
+function render() {
+  var list = document.getElementById('slist'); list.innerHTML = '';
+  var totP = 0;
+  PARADAS.forEach(function(p) {
+    var isDone = !!done[p.id];
+    var card = document.createElement('div');
+    var tClass = '', tag = '', body = '';
+    if (p.tipo === 'recogida') {
+      tClass = 't-rec'; tag = '<span class="stag tr">Recoger</span>';
+      body = p.notas ? '<div class="nbox"><strong>Que recoger</strong>' + p.notas + '</div>' : '';
+    } else if (p.tipo === 'punto-retiro') {
+      tClass = 't-ret'; var nPed=(p.clientes?p.clientes.length:0); tag = '<span class="stag tt">'+nPed+' pedido'+(nPed!==1?'s':'')+' &middot; Retiro en tienda</span>';
+      p.clientes.forEach(function(c){ totP += c.productos.length; });
+      body = p.clientes.map(function(cl) {
+        var prods = cl.productos.map(function(pr){ return '<div class="pitem"><span>'+pr.nombre+'</span><span class="pqty">'+pr.qty+'</span></div>'; }).join('');
+        var ph = cl.phone ? '<div class="clirow-ph">Tel: '+cl.phone+'</div>' : '';
+        return '<div class="clirow"><div class="clirow-name">'+cl.custName+' <small style="color:var(--ol);font-size:13px">'+cl.orderNum+'</small></div>'+ph+'<div class="ptitle">Productos</div>'+prods+'</div>';
+      }).join('');
+    } else {
+      tag = '<span class="stag te">Entrega</span>'; totP += p.productos.length;
+      var prods = p.productos.map(function(pr){ return '<div class="pitem"><span>'+pr.nombre+'</span><span class="pqty">'+pr.qty+'</span></div>'; }).join('');
+      body = '<div class="ptitle">Productos ('+p.productos.length+')</div>'+prods+(p.notas?'<div class="nbox"><strong>Instrucciones</strong>'+p.notas+'</div>':'');
+    }
+    card.className = 'scard'+(isDone?' done':'')+(tClass?' '+tClass:'');
+    var ph = (p.telefono||'').split(',')[0];
+    var phBtn = ph ? '<button class="bic bc" data-tel="'+ph+'">&#128222;</button>' : '';
+    card.innerHTML = '<div class="shdr" data-id="'+p.id+'"><div class="snum">'+(isDone?'&#10003;':p.id)+'</div><div class="sinfo">'+tag+'<div class="sname">'+(p.nombre||'')+'</div><div class="saddr">'+(p.direccion||'')+'</div></div><div class="sact"><button class="bic bm" data-map="'+p.mapUrl+'">&#128506;</button>'+phBtn+'<button class="bic bd'+(isDone?' on':'')+'" data-done="'+p.id+'">OK</button></div></div><div class="sbody" id="b'+p.id+'">'+body+'</div>';
+    list.appendChild(card);
+  });
+  document.getElementById('sProds').textContent = totP;
+  updP();
+}
+
+document.addEventListener('click', function(e) {
+  var m = e.target.closest('[data-map]'); if (m){ e.stopPropagation(); window.open(m.dataset.map,'_blank'); return; }
+  var tel = e.target.closest('[data-tel]'); if (tel){ e.stopPropagation(); window.location.href='tel:'+tel.dataset.tel; return; }
+  var dn = e.target.closest('[data-done]');
+  if (dn) {
+    e.stopPropagation();
+    var id = parseInt(dn.dataset.done);
+    var nowDone = !done[id];
+    if (nowDone) { done[id] = true; } else { delete done[id]; }
+    render(); syncStop(id, nowDone); saveCache();
+    showT(nowDone ? 'Completado' : 'Pendiente');
+    return;
+  }
+  var hdr = e.target.closest('.shdr'); if (hdr){ var b=document.getElementById('b'+hdr.dataset.id); if(b)b.classList.toggle('open'); }
+});
+
+function syncStop(id, completado) {
+  var p = PARADAS.find(function(x){ return x.id===id; }); if(!p) return;
+  gasPost({action:'update', ruta_id:RUTA_ID, parada_id:id, nombre:p.nombre||'', tipo:p.tipo, fecha:FECHA, estado:completado?'completado':'pendiente'});
+}
+
+function applyProdOverrides() {
+  PARADAS.forEach(function(p) {
+    if (p.tipo === 'punto-retiro') {
+      p.clientes = p.clientes.filter(function(cl) {
+        var ov = prodOverrides[cl.orderNum];
+        return !ov || !ov.orderDeleted;
+      });
+      p.clientes.forEach(function(cl) {
+        var ov = prodOverrides[cl.orderNum];
+        if (!ov) return;
+        if (ov.direccion) cl.punto = ov.direccion;
+        // Filter deleted products by original index, then apply qty overrides
+        cl.productos = cl.productos.filter(function(pr, pi) {
+          return !ov.deleted || ov.deleted.indexOf(pi) < 0;
+        });
+        if (ov.qty) {
+          cl.productos.forEach(function(pr, pi) {
+            if (ov.qty[pi] !== undefined) pr.qty = ov.qty[pi];
+          });
+        }
+      });
+    } else if (p.tipo === 'entrega') {
+      var key = '#' + p.id;
+      var ov  = prodOverrides[key];
+      if (!ov) return;
+      if (ov.orderDeleted) { p._deleted = true; return; }
+      if (ov.direccion) {
+        p.direccion = ov.direccion;
+        p.mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ov.direccion);
+      }
+      if (!p.productos) return;
+      if (ov.deleted && ov.deleted.length) {
+        p.productos = p.productos.filter(function(pr, pi) { return ov.deleted.indexOf(pi) < 0; });
+      }
+      if (ov.qty) {
+        p.productos.forEach(function(pr, pi) {
+          if (ov.qty[pi] !== undefined) pr.qty = ov.qty[pi];
+        });
+      }
+    }
+  });
+}
+
+function updP() {
+  var pd = Object.keys(done).length;
+  var md = Object.keys(misionesDone).length;
+  var mt = misionesData.length;
+  var total = TOTAL + mt;
+  var totalDone = pd + md;
+  document.getElementById('pb').style.width = (total ? (totalDone/total*100) : 0)+'%';
+  document.getElementById('pt').textContent = pd+' de '+TOTAL+' entregas · '+md+' de '+mt+' misiones';
+}
+
+// ── MISIONES ─────────────────────────────────────────────────────────
+function renderMisiones() {
+  var list = document.getElementById('ms-list');
+  var total = misionesData.length;
+  if (total === 0) { list.innerHTML = '<div class="ms-empty">Sin misiones esta semana &#127881;</div>'; document.getElementById('msCnt').textContent='0/0'; return; }
+  var done2 = Object.keys(misionesDone).length;
+  document.getElementById('msCnt').textContent = done2+'/'+total;
+  document.getElementById('msPbf').style.width = (done2/total*100)+'%';
+  list.innerHTML = misionesData.map(function(m,i) {
+    var isDone = !!misionesDone[i];
+    var prodsHtml = m.productos && m.productos.length ? '<div class="ms-prods"><strong>Productos a recoger</strong>'+m.productos.join('<br>')+'</div>' : '';
+    var mapBtn = m.maps ? '<button class="ms-map" onclick="window.open(\'' + m.maps + '\',\'_blank\')">&#128506; Abrir en Maps</button>' : '<button class="ms-map" style="opacity:.3;cursor:default">Sin Maps</button>';
+    return '<div class="ms-card'+(isDone?' done':'')+'"><div class="ms-top"><div class="ms-num">'+(isDone?'&#10003;':(i+1))+'</div><div class="ms-name">'+m.nombre+'</div></div><div class="ms-mision">'+m.mision+'</div>'+prodsHtml+'<div class="ms-actions">'+mapBtn+'<button class="ms-ok'+(isDone?' on':'')+'" data-mis="'+i+'">OK</button></div></div>';
+  }).join('');
+}
+
+// ── CARGA ────────────────────────────────────────────────────────────
+function buildCarga() {
+  var w = document.getElementById('clist'); w.innerHTML = '';
+  var items = [], total = 0;
+  PARADAS.forEach(function(p) {
+    if(p.tipo==='recogida'){items.push({tipo:'recogida',label:p.nombre,sub:p.notas||'',id:'p'+p.id,productos:[]});total++;}
+    else if(p.tipo==='punto-retiro'){p.clientes.forEach(function(cl){ items.push({tipo:'retiro en tienda',label:cl.custName,sub:p.nombre,id:'c'+cl.orderNum,productos:cl.productos||[]}); total++; });}
+    else{ items.push({tipo:'entrega',label:p.nombre,sub:p.direccion,id:'p'+p.id,productos:p.productos||[]}); total++; }
+  });
+  items.forEach(function(item) {
+    var div=document.createElement('div'); div.className='cli'+(clDone[item.id]?' ck':''); div.dataset.clid=item.id; div.dataset.cltotal=total;
+    var bc=item.tipo==='retiro en tienda'?'background:#cdece2;color:#3d5a40':'background:#d4edda;color:#1a5e2e';
+    var ov = prodOverrides[item.id]||{deleted:[],qty:{}};
+    var prodsHtml='';
+    if(item.productos && item.productos.length){
+      prodsHtml='<div class="prod-list">';
+      item.productos.forEach(function(pr,pi){
+        if(ov.deleted && ov.deleted.indexOf(pi)>=0) return;
+        var qty=(ov.qty && ov.qty[pi]!==undefined)?ov.qty[pi]:pr.qty;
+        prodsHtml+='<div class="prod-row">'
+          +'<span class="prod-qty">'+qty+'</span>'
+          +'<span class="prod-nom">'+pr.nombre+'</span>'
+          +'<button class="prod-edit" data-clid="'+item.id+'" data-pidx="'+pi+'">&#9998;</button>'
+          +'<button class="prod-del" data-clid="'+item.id+'" data-pidx="'+pi+'">&#10005;</button>'
+          +'</div>';
+      });
+      prodsHtml+='</div>';
+    }
+    div.innerHTML='<div class="ccirc">'+(clDone[item.id]?'&#10003;':'')+'</div><div class="ctxt"><strong>'+item.label+'</strong><span style="'+bc+';font-size:13px;padding:3px 10px;border-radius:10px;margin-left:8px;font-weight:800">'+item.tipo+'</span><small>'+item.sub+'</small>'+prodsHtml+'</div>';
+    w.appendChild(div);
+  });
+  updCL(total);
+}
+
+document.addEventListener('click', function(e) {
+  // Product delete
+  var prodDel=e.target.closest('.prod-del');
+  if(prodDel){
+    e.stopPropagation();
+    var cid=prodDel.dataset.clid, pi=parseInt(prodDel.dataset.pidx);
+    if(!prodOverrides[cid]) prodOverrides[cid]={deleted:[],qty:{}};
+    if(prodOverrides[cid].deleted.indexOf(pi)<0) prodOverrides[cid].deleted.push(pi);
+    buildCL(); showT('Producto eliminado'); return;
+  }
+  // Product edit qty
+  var prodEdit=e.target.closest('.prod-edit');
+  if(prodEdit){
+    e.stopPropagation();
+    var cid=prodEdit.dataset.clid, pi=parseInt(prodEdit.dataset.pidx);
+    if(!prodOverrides[cid]) prodOverrides[cid]={deleted:[],qty:{}};
+    var nv=prompt('Nueva cantidad:',prodOverrides[cid].qty[pi]||'');
+    if(nv===null) return;
+    prodOverrides[cid].qty[pi]=nv.trim();
+    buildCL(); showT('Cantidad actualizada'); return;
+  }
+  var cli = e.target.closest('.cli[data-clid]'); if(!cli) return;
+  var id=cli.dataset.clid, total=parseInt(cli.dataset.cltotal);
+  if(clDone[id]){delete clDone[id];}else{clDone[id]=true;}
+  cli.classList.toggle('ck'); cli.querySelector('.ccirc').innerHTML=clDone[id]?'&#10003;':''; updCL(total); saveCache();
+});
+
+function updCL(t) {
+  var d=Object.keys(clDone).length;
+  document.getElementById('clcnt').textContent=d+'/'+t;
+  document.getElementById('clpbf').style.width=(t?d/t*100:0)+'%';
+  if(document.getElementById('hsCarga')) document.getElementById('hsCarga').textContent=d+'/'+t;
+}
+
+// ── KM ───────────────────────────────────────────────────────────────
+document.getElementById('kmI').addEventListener('input', onKm);
+document.getElementById('kmF').addEventListener('input', onKm);
+document.getElementById('btnI').addEventListener('click', function(){ enviar(0); });
+document.getElementById('btnF').addEventListener('click', function(){ enviar(1); });
+
+function onKm() {
+  var ki=document.getElementById('kmI').value, kf=document.getElementById('kmF').value;
+  document.getElementById('btnI').disabled=!ki; document.getElementById('btnF').disabled=!kf;
+  var diff=document.getElementById('kmDiff');
+  if(ki&&kf&&parseInt(kf)>parseInt(ki)){ document.getElementById('kmDiffN').textContent=(parseInt(kf)-parseInt(ki)).toLocaleString('es-CL')+' km'; diff.style.display='block'; }
+  else{ diff.style.display='none'; }
+}
+
+function enviar(esFin) {
+  var ki=document.getElementById('kmI').value, kf=document.getElementById('kmF').value;
+  var comp=Object.keys(done).length, msg;
+  if(!esFin){ msg='Vecinos - Inicio de ruta\nFecha: '+FECHA+'\nKm inicial: '+parseInt(ki).toLocaleString('es-CL')+'\n\nAdjunto foto del odometro.'; document.getElementById('sentI').style.display='block'; }
+  else{ var diff=(ki&&kf&&parseInt(kf)>parseInt(ki))?(parseInt(kf)-parseInt(ki)):null; msg='Vecinos - Fin de ruta\nFecha: '+FECHA+'\nKm final: '+parseInt(kf).toLocaleString('es-CL')+'\n'+(diff?'Recorridos: '+diff.toLocaleString('es-CL')+' km\n':'')+'Paradas: '+comp+' de '+TOTAL+'\n\nAdjunto foto del odometro.'; document.getElementById('sentF').style.display='block'; }
+  // Save km to Sheet
+  gasPost({action:'saveKm', ruta_id:RUTA_ID, kmInicio: ki||'', kmFin: kf||''});
+  saveCache();
+  window.open('https://wa.me/'+WSP+'?text='+encodeURIComponent(msg),'_blank');
+  showT('WhatsApp abierto');
+}
+
+function toggleMision(i) {
+  var nowDone = !misionesDone[i];
+  if (nowDone) { misionesDone[i] = true; } else { delete misionesDone[i]; }
+  renderMisiones(); updateHome(); updP(); saveCache();
+  showT(nowDone ? '\u2713 Misi\u00f3n completada' : 'Misi\u00f3n pendiente');
+  gasPost({ action:'saveMisionDone', ruta_id:RUTA_ID, misionesDone:misionesDone });
+}
+
+// ── RESUMEN ──────────────────────────────────────────────────────────
+function buildRes() {
+  var ki=document.getElementById('kmI').value, kf=document.getElementById('kmF').value;
+  var kmRecorridos = (ki&&kf&&parseInt(kf)>parseInt(ki)) ? (parseInt(kf)-parseInt(ki)) : null;
+  var diff = kmRecorridos ? kmRecorridos.toLocaleString('es-CL')+' km' : '--';
+  var pago = kmRecorridos ? (25000 + kmRecorridos * 200) : null;
+  var pagoStr = pago ? '$'+pago.toLocaleString('es-CL') : '--';
+  var h = '';
+
+  // Misiones
+  if (misionesData.length > 0) {
+    h += '<div class="rsec"><h3>Misiones</h3>';
+    misionesData.forEach(function(m, i) {
+      var ok = !!misionesDone[i];
+      h += '<div class="trow"><span>'+(ok?'&#10003; ':'&#9679; ')+m.nombre+'</span><span class="v" style="color:'+(ok?'var(--ol)':'var(--ch)')+'">'+(ok?'Listo':'Pendiente')+'</span></div>';
+    });
+    var mdone = Object.keys(misionesDone).length;
+    h += '<div class="trow" style="border-top:2px solid var(--gp);margin-top:4px"><span>Total</span><span class="v">'+mdone+'/'+misionesData.length+'</span></div>';
+    h += '</div>';
+  }
+
+  // Paradas
+  h += '<div class="rsec"><h3>Paradas de entrega</h3>';
+  PARADAS.forEach(function(p){ var ok=!!done[p.id]; h+='<div class="trow"><span>'+(ok?'&#10003; ':'&#9679; ')+(p.nombre||'')+'</span><span class="v" style="color:'+(ok?'var(--ol)':'var(--ch)')+'">'+(ok?'Listo':'Pendiente')+'</span></div>'; });
+  var pdone = Object.keys(done).length;
+  h += '<div class="trow" style="border-top:2px solid var(--gp);margin-top:4px"><span>Total</span><span class="v">'+pdone+'/'+TOTAL+'</span></div>';
+  h += '</div>';
+
+  // Km + pago
+  h += '<div class="rsec"><h3>Kilometraje</h3>';
+  h += '<div class="trow"><span>Km inicio</span><span class="v">'+(ki||'--')+'</span></div>';
+  h += '<div class="trow"><span>Km fin</span><span class="v">'+(kf||'--')+'</span></div>';
+  h += '<div class="trow"><span>Total recorrido</span><span class="v">'+diff+'</span></div>';
+  h += '<div class="trow pago"><span>&#128176; Pago estimado</span><span class="v">'+pagoStr+'</span></div>';
+  h += '</div>';
+
+  document.getElementById('rescont').innerHTML = h;
+}
+
+// ── NAV ──────────────────────────────────────────────────────────────
+document.getElementById('nb-home').addEventListener('click', function(){ showScr('home'); updateHome(); });
+document.getElementById('nb-km').addEventListener('click',   function(){ showScr('km'); });
+document.getElementById('nb-mis').addEventListener('click',  function(){ showScr('mis'); });
+document.getElementById('nb-ruta').addEventListener('click', function(){ showScr('ruta'); });
+document.getElementById('nb-carga').addEventListener('click',function(){ showScr('carga'); });
+document.getElementById('nb-res').addEventListener('click',  function(){ showScr('res'); });
+
+function showScr(n) {
+  document.querySelectorAll('.scr').forEach(function(s){ s.classList.remove('active'); });
+  ['nb-home','nb-km','nb-mis','nb-ruta','nb-carga','nb-res'].forEach(function(id){ var el=document.getElementById(id); if(el) el.classList.remove('active'); });
+  document.getElementById('scr-'+n).classList.add('active');
+  document.getElementById('nb-'+n).classList.add('active');
+  if(n==='carga') buildCarga();
+  if(n==='res') buildRes();
+}
+
+function showT(m) {
+  var t=document.getElementById('t'); t.innerHTML=m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); },2200);
+}
+
+loadData();
+</script></body></html>

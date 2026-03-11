@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Vecinos · Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gd:#3d5a40;--gm:#5a8e7d;--gl:#cdece2;--gp:#ccdcd6;--ol:#7a9645;
+  --ch:#2a2a2a;--or:#f4a259;--pc:#ffdeb6;--bg:#f4f7f4;--red:#bd4a52;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);min-height:100vh;font-size:16px}
+
+/* HEADER */
+.hdr{background:var(--gd);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 16px rgba(40,70,42,.3);position:sticky;top:0;z-index:100}
+.logo img{height:42px;object-fit:contain}
+.badge-sync{background:rgba(255,255,255,.18);color:white;padding:9px 18px;border-radius:22px;font-size:14px;cursor:pointer;font-weight:700;border:none;font-family:'Readex Pro',sans-serif}
+
+/* TABS */
+.tabs{display:flex;background:white;border-bottom:2px solid var(--gl);position:sticky;top:74px;z-index:99;overflow-x:auto}
+.tab{flex:1;min-width:80px;padding:14px 8px;border:none;background:none;font-family:'Readex Pro',sans-serif;font-size:13px;font-weight:700;color:#aaa;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab.active{color:var(--gd);border-bottom-color:var(--gm)}
+.panel{display:none;padding:16px}
+.panel.active{display:block}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ch);color:white;padding:12px 22px;border-radius:14px;font-size:14px;font-weight:700;opacity:0;transition:opacity .3s;z-index:999;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* ── RESUMEN ──────────────────────────────────────────── */
+.resumen-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.res-card{background:white;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.res-card-big{background:var(--gd);border-radius:16px;padding:18px;box-shadow:0 4px 16px rgba(61,90,64,.3);grid-column:span 2}
+.res-num{font-size:36px;font-weight:700;color:var(--gd)}
+.res-num-white{font-size:36px;font-weight:700;color:white}
+.res-label{font-size:12px;color:var(--gm);font-weight:600;margin-top:2px}
+.res-label-white{font-size:13px;color:rgba(255,255,255,.8);font-weight:600;margin-top:2px}
+.res-prog{display:flex;align-items:baseline;gap:8px}
+.res-frac{font-size:14px;color:rgba(255,255,255,.7);font-weight:600}
+
+.estado-list{background:white;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px}
+.estado-list-title{font-size:13px;font-weight:700;color:var(--gm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.estado-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gl)}
+.estado-item:last-child{border-bottom:none}
+.estado-name{font-size:14px;font-weight:600}
+.estado-cnt{font-size:13px;font-weight:700;background:var(--gl);color:var(--gd);padding:3px 10px;border-radius:10px}
+
+.vienen-list{background:white;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.vienen-title{font-size:13px;font-weight:700;color:var(--gm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.vienen-vendor{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gl)}
+.vienen-vendor:last-child{border-bottom:none}
+.vienen-dot{width:8px;height:8px;border-radius:50%;background:var(--gd);flex-shrink:0}
+.vienen-vname{font-size:14px;font-weight:600}
+
+/* ── PEDIDOS ──────────────────────────────────────────── */
+.pedido-card{background:white;border-radius:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden}
+.pedido-header{padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.pedido-num{font-size:13px;font-weight:700;color:var(--gm)}
+.pedido-nombre{font-size:16px;font-weight:700;color:var(--ch)}
+.pedido-lugar{font-size:12px;color:var(--gm);margin-top:2px}
+.pedido-estado-badge{flex-shrink:0;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;text-align:center;margin-top:2px}
+.estado-pendiente{background:#fef3c7;color:#d97706}
+.estado-incompleto{background:#fed7aa;color:#ea580c}
+.estado-preparado{background:#d1fae5;color:#059669}
+.estado-cargado{background:#dbeafe;color:#2563eb}
+.estado-entregado{background:#ede9fe;color:#7c3aed}
+
+.pedido-prods{padding:0 16px 14px}
+.prod-item{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--gl)}
+.prod-item:last-child{border-bottom:none}
+.prod-check{width:22px;height:22px;border-radius:7px;border:2px solid #d1d5db;background:white;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.prod-check.checked{background:var(--gd);border-color:var(--gd)}
+.prod-check.checked::after{content:'✓';color:white;font-size:13px;font-weight:700}
+.prod-info{flex:1}
+.prod-nombre{font-size:14px;font-weight:600;color:var(--ch)}
+.prod-nombre.checked{text-decoration:line-through;color:#9ca3af}
+.prod-vendor{font-size:11px;color:var(--gm)}
+.prod-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}
+.tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap}
+.tag-c{background:#dbeafe;color:#3b82f6}
+.tag-r{background:#fce7f3;color:#ec4899}
+.tag-nota{background:#fef9c3;color:#854d0e;font-weight:600}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-btn{flex-shrink:0;padding:7px 14px;border-radius:20px;border:2px solid var(--gl);background:white;font-family:'Readex Pro',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--gm);white-space:nowrap;transition:all .15s}
+.filter-btn.active{background:var(--gd);border-color:var(--gd);color:white}
+
+/* ── PRODUCTORES ──────────────────────────────────────── */
+.prov-card{background:white;border-radius:16px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden}
+.prov-header-title{padding:14px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--gl)}
+.prov-name{font-size:17px;font-weight:800;color:var(--ch);flex:1}
+.prov-estado-badge{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.prov-table{width:100%;border-collapse:collapse}
+.prov-table thead tr{background:var(--gl)}
+.prov-table th{padding:8px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--gm);text-align:left}
+.prov-table td{padding:10px 12px;border-bottom:1px solid #f0f4f0;font-size:14px}
+.prov-table tr:last-child td{border-bottom:none}
+.prov-prod-name{font-weight:600;color:var(--ch)}
+
+/* Loading */
+.loading-msg{text-align:center;padding:40px 20px;color:var(--gm);font-size:15px}
+.loading-msg .spin{display:inline-block;width:24px;height:24px;border:3px solid var(--gl);border-top-color:var(--gd);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Empty */
+.empty-msg{text-align:center;padding:40px 20px;color:var(--gm);font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="hdr">
+  <div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_2.png?v=1772739099" alt="Vecinos"></div>
+  <button class="badge-sync" onclick="loadAll()">&#8635; Actualizar</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="resumen">&#128203; Resumen</button>
+  <button class="tab" data-tab="pedidos">&#128230; Pedidos</button>
+  <button class="tab" data-tab="proveedores">&#127807; Productores</button>
+</div>
+
+<div class="panel active" id="panel-resumen">
+  <div id="resumen-content"><div class="loading-msg"><div class="spin"></div><br>Cargando...</div></div>
+</div>
+
+<div class="panel" id="panel-pedidos">
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
+    <button class="filter-btn" data-filter="pendiente" onclick="setFilter('pendiente',this)">Pendiente</button>
+    <button class="filter-btn" data-filter="incompleto" onclick="setFilter('incompleto',this)">Incompleto</button>
+    <button class="filter-btn" data-filter="preparado" onclick="setFilter('preparado',this)">Preparado</button>
+  </div>
+  <div id="pedidos-content"><div class="loading-msg"><div class="spin"></div><br>Cargando...</div></div>
+</div>
+
+<div class="panel" id="panel-proveedores">
+  <div id="proveedores-content"><div class="loading-msg"><div class="spin"></div><br>Cargando...</div></div>
+</div>
+
+<script>
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykqQLxkNidUZnmcXADFvUmuuAfvs5rk8eebEL9OG7uh4-6eXGG1e0nc_1oESEG4NvT/exec';
+
+var PARADAS = [];
+var vendorMeta = {};   // {vendor: estado}
+var productMeta = {};  // {"NxProdName||vendor": {c,r,nota}}
+var vendorData = {};   // {vendor: ["2x Producto", ...]}
+var pickerProgress = {}; // {orderKey: [checkedIndices]}
+var RUTA_ID = '';
+var currentFilter = 'todos';
+
+// ── TABS ──────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── GAS FETCH (fetch + JSONP fallback para móvil) ─────
+function gasGet(action, cb) {
+  var url = SCRIPT_URL + '?action=' + action + (RUTA_ID ? '&ruta_id=' + encodeURIComponent(RUTA_ID) : '') + '&t=' + Date.now();
+  var cbDone = false;
+
+  function doJsonp() {
+    var id = 'cb_' + action + '_' + Date.now();
+    var timer = setTimeout(function() {
+      if (!cbDone) { cbDone = true; delete window[id]; cb(null); }
+    }, 10000);
+    window[id] = function(data) {
+      if (!cbDone) { cbDone = true; clearTimeout(timer); delete window[id]; cb(data); }
+    };
+    var s = document.createElement('script');
+    s.src = SCRIPT_URL + '?action=' + action + (RUTA_ID ? '&ruta_id=' + encodeURIComponent(RUTA_ID) : '') + '&callback=' + id + '&t=' + Date.now();
+    s.onerror = function() {
+      if (!cbDone) { cbDone = true; clearTimeout(timer); delete window[id]; cb(null); }
+    };
+    document.head.appendChild(s);
+  }
+
+  // Timeout to fall back to JSONP if fetch hangs
+  var fetchTimer = setTimeout(function() {
+    if (!cbDone) doJsonp();
+  }, 5000);
+
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      clearTimeout(fetchTimer);
+      if (!cbDone) { cbDone = true; cb(data); }
+    })
+    .catch(function() {
+      clearTimeout(fetchTimer);
+      if (!cbDone) doJsonp();
+    });
+}
+
+function gasPost(payload, cb) {
+  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify(payload) })
+    .then(function(){ if(cb) cb({ok:true}); })
+    .catch(function(){ if(cb) cb(null); });
+}
+
+// ── LOAD ALL ──────────────────────────────────────────
+function loadAll() {
+  showT('Sincronizando...');
+  var done = 0;
+  var built = false;
+  function check() {
+    done++;
+    if(done >= 5 && !built) { built = true; buildAll(); showT('✓ Actualizado'); }
+  }
+  setTimeout(function() {
+    if(!built) { built = true; buildAll(); showT('✓ Listo'); }
+  }, 12000);
+
+  gasGet('paradas', function(res) {
+    if(res && res.ok) { PARADAS = res.paradas || []; RUTA_ID = res.ruta_id || ''; }
+    check();
+  });
+  gasGet('vendors', function(res) {
+    if(res && res.vendors) vendorData = res.vendors;
+    check();
+  });
+  gasGet('vendorMeta', function(res) {
+    if(res && res.meta) vendorMeta = res.meta;
+    check();
+  });
+  gasGet('productMeta', function(res) {
+    if(res && res.meta) productMeta = res.meta;
+    check();
+  });
+  gasGet('pickerProgress', function(res) {
+    if(res && res.progress) pickerProgress = res.progress;
+    check();
+  });
+}
+
+function buildAll() {
+  renderResumen();
+  renderPedidos();
+  renderProveedores();
+}
+
+// ── HELPERS ───────────────────────────────────────────
+function getAllOrders() {
+  var orders = [];
+  PARADAS.forEach(function(p) {
+    if(p.tipo === 'punto-retiro') {
+      p.clientes.forEach(function(cl) {
+        orders.push({ key: cl.orderNum, nombre: cl.custName, lugar: p.nombre, productos: cl.productos || [], tipo: 'retiro' });
+      });
+    } else if(p.tipo === 'entrega') {
+      orders.push({ key: '#'+p.id, nombre: p.nombre, lugar: p.direccion, productos: p.productos || [], tipo: 'entrega' });
+    }
+  });
+  return orders;
+}
+
+function getOrderEstado(orderKey, productos) {
+  var checked = pickerProgress[orderKey] || [];
+  var total = productos.length;
+  if(total === 0) return 'preparado';
+  if(checked.length === 0) return 'pendiente';
+  if(checked.length >= total) return 'preparado';
+  return 'incompleto';
+}
+
+function getEstadoLabel(e) {
+  return {pendiente:'Pendiente',incompleto:'Incompleto',preparado:'Preparado',cargado:'Cargado',entregado:'Entregado'}[e] || e;
+}
+function getEstadoClass(e) {
+  return 'estado-'+e;
+}
+
+function getProdKey(prod) {
+  return (prod.nombre||prod) + '||' + (prod.vendor||'');
+}
+
+function getProdTags(prod) {
+  var nombre = prod.nombre || String(prod);
+  var vendor = prod.vendor || '';
+  // productMeta keys are "2x Nombre||Vendor" — search all keys for this product
+  var meta = {};
+  Object.keys(productMeta).forEach(function(k) {
+    var parts = k.split('||');
+    if(parts.length < 2) return;
+    var kvendor = parts[1].trim();
+    var kname = parts[0].trim();
+    // Match if vendor matches (or empty) AND name matches with or without qty prefix
+    var knameStripped = kname.replace(/^\d+x\s+/i,'').trim();
+    if((vendor && kvendor !== vendor) && kvendor !== '') return;
+    if(kname === nombre || knameStripped === nombre) meta = productMeta[k];
+  });
+  var tags = '';
+  if(meta.c) tags += '<span class="tag tag-c">&#10052; Congelar</span> ';
+  if(meta.r) tags += '<span class="tag tag-r">&#10052; Refrigerar</span> ';
+  if(meta.nota) tags += '<span class="tag tag-nota">&#128203; ' + meta.nota + '</span>';
+  return tags;
+}
+
+// ── RESUMEN ───────────────────────────────────────────
+function renderResumen() {
+  var orders = getAllOrders();
+  var total = orders.length;
+  var preparados = 0, pendientes = 0, incompletos = 0;
+  orders.forEach(function(o) {
+    var e = getOrderEstado(o.key, o.productos);
+    if(e === 'preparado') preparados++;
+    else if(e === 'incompleto') incompletos++;
+    else pendientes++;
+  });
+
+  // Count vendors by estado
+  var estadoCounts = {};
+  var ESTADOS_ORDER = ['Pasar a buscar','Vienen a dejar','En bodega','En riesgo'];
+  ESTADOS_ORDER.forEach(function(e){ estadoCounts[e] = 0; });
+  var vendorsVienen = [];
+  Object.keys(vendorMeta).forEach(function(v) {
+    var e = vendorMeta[v];
+    if(!e || e === '—') return;
+    if(estadoCounts[e] !== undefined) estadoCounts[e]++;
+    else estadoCounts[e] = 1;
+    if(e === 'Vienen a dejar') vendorsVienen.push(v);
+  });
+
+  var estadoColors = {'Pasar a buscar':'#f4a259','Vienen a dejar':'#5a8e7d','En bodega':'#a1ac6f','En riesgo':'#bd4a52'};
+
+  var html = '';
+  // Main progress card
+  html += '<div class="res-card-big">';
+  html += '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">';
+  html += '<div><span style="font-size:42px;font-weight:800;color:white;line-height:1">' + preparados + '</span><span style="font-size:16px;color:rgba(255,255,255,.8);font-weight:700;margin-left:10px">preparados</span></div>';
+  html += '<div><span style="font-size:42px;font-weight:800;color:rgba(255,255,255,.75);line-height:1">' + pendientes + '</span><span style="font-size:16px;color:rgba(255,255,255,.6);font-weight:700;margin-left:10px">pendientes</span></div>';
+  if(incompletos > 0) html += '<div><span style="font-size:42px;font-weight:800;color:#ffdeb6;line-height:1">' + incompletos + '</span><span style="font-size:16px;color:rgba(255,220,150,.8);font-weight:700;margin-left:10px">incompletos</span></div>';
+  html += '</div>';
+  // Mini progress bar
+  var pct = total ? Math.round(preparados/total*100) : 0;
+  html += '<div style="background:rgba(255,255,255,.2);border-radius:10px;height:6px"><div style="width:' + pct + '%;height:100%;background:white;border-radius:10px;transition:width .5s"></div></div>';
+  html += '<div style="display:flex;justify-content:flex-end;margin-top:6px">';
+  html += '<span style="font-size:13px;color:rgba(255,255,255,.8);font-weight:700">' + pct + '% listo</span>';
+  html += '</div></div>';
+
+  // Estado counts
+  var hasEstados = Object.values(estadoCounts).some(function(c){ return c > 0; });
+  if(hasEstados) {
+    html += '<div class="estado-list"><div class="estado-list-title">Productores por estado</div>';
+    ESTADOS_ORDER.forEach(function(e) {
+      if(!estadoCounts[e]) return;
+      html += '<div class="estado-item"><span class="estado-name" style="color:' + (estadoColors[e]||'var(--ch)') + '">' + e + '</span><span class="estado-cnt">' + estadoCounts[e] + '</span></div>';
+    });
+    html += '</div>';
+  }
+
+  // Vienen a dejar list
+  if(vendorsVienen.length > 0) {
+    html += '<div class="vienen-list"><div class="vienen-title">🚐 Vienen a dejar hoy</div>';
+    vendorsVienen.forEach(function(v) {
+      html += '<div class="vienen-vendor"><div class="vienen-dot"></div><span class="vienen-vname">' + v + '</span></div>';
+    });
+    html += '</div>';
+  }
+
+  document.getElementById('resumen-content').innerHTML = html || '<div class="empty-msg">Sin datos. Toca Actualizar para cargar.</div>';
+}
+
+// ── PEDIDOS ───────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderPedidos();
+}
+
+function renderPedidos() {
+  var orders = getAllOrders();
+  if(currentFilter !== 'todos') {
+    orders = orders.filter(function(o){ return getOrderEstado(o.key, o.productos) === currentFilter; });
+  }
+
+  if(!orders.length) {
+    document.getElementById('pedidos-content').innerHTML = '<div class="empty-msg">Sin pedidos' + (currentFilter !== 'todos' ? ' en este estado' : '. Sincroniza primero.') + '</div>';
+    return;
+  }
+
+  var html = '';
+  orders.forEach(function(order) {
+    var checked = pickerProgress[order.key] || [];
+    var estado = getOrderEstado(order.key, order.productos);
+    var estadoLabel = getEstadoLabel(estado);
+    var estadoClass = getEstadoClass(estado);
+
+    html += '<div class="pedido-card" id="order-' + order.key.replace('#','') + '">';
+    html += '<div class="pedido-header">';
+    html += '<div><div class="pedido-num">' + order.key + '</div><div class="pedido-nombre">' + order.nombre + '</div><div class="pedido-lugar">📍 ' + order.lugar + '</div></div>';
+    html += '<div class="pedido-estado-badge ' + estadoClass + '">' + estadoLabel + '</div>';
+    html += '</div>';
+
+    if(order.productos.length > 0) {
+      html += '<div class="pedido-prods">';
+      order.productos.forEach(function(prod, idx) {
+        var isChecked = checked.indexOf(idx) >= 0;
+        var tags = getProdTags(prod);
+        html += '<div class="prod-item">';
+        html += '<div class="prod-check' + (isChecked?' checked':'') + '" onclick="toggleCheck(\'' + order.key + '\',' + idx + ',this)"></div>';
+        html += '<div class="prod-info">';
+        html += '<div class="prod-nombre' + (isChecked?' checked':'') + '">' + (prod.qty||'') + ' ' + (prod.nombre||prod) + '</div>';
+        if(prod.vendor) html += '<div class="prod-vendor">' + prod.vendor + '</div>';
+        if(tags) html += '<div class="prod-tags">' + tags + '</div>';
+        html += '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  document.getElementById('pedidos-content').innerHTML = html;
+}
+
+function toggleCheck(orderKey, idx, el) {
+  if(!pickerProgress[orderKey]) pickerProgress[orderKey] = [];
+  var arr = pickerProgress[orderKey];
+  var pos = arr.indexOf(idx);
+  if(pos >= 0) arr.splice(pos, 1);
+  else arr.push(idx);
+
+  // Update UI
+  el.classList.toggle('checked', pos < 0);
+  var nameEl = el.nextElementSibling && el.nextElementSibling.querySelector('.prod-nombre');
+  if(nameEl) nameEl.classList.toggle('checked', pos < 0);
+
+  // Update order estado badge
+  var order = getAllOrders().find(function(o){ return o.key === orderKey; });
+  if(order) {
+    var card = document.getElementById('order-' + orderKey.replace('#',''));
+    if(card) {
+      var badge = card.querySelector('.pedido-estado-badge');
+      var estado = getOrderEstado(orderKey, order.productos);
+      badge.className = 'pedido-estado-badge ' + getEstadoClass(estado);
+      badge.textContent = getEstadoLabel(estado);
+    }
+  }
+
+  // Auto-save progress to GAS (debounced)
+  clearTimeout(window._saveTimer);
+  window._saveTimer = setTimeout(savePickerProgress, 1500);
+  updateResumenNumbers();
+}
+
+function savePickerProgress() {
+  if(!RUTA_ID) return;
+  gasPost({ action:'savePickerProgress', ruta_id: RUTA_ID, progress: pickerProgress }, function(res) {
+    if(res && res.ok) showT('✓ Progreso guardado');
+  });
+}
+
+function updateResumenNumbers() {
+  // Quick update resumen tab if visible
+  var panel = document.getElementById('panel-resumen');
+  if(panel.classList.contains('active')) renderResumen();
+}
+
+// ── PRODUCTORES ───────────────────────────────────────
+function renderProveedores() {
+  if(!Object.keys(vendorData).length) {
+    document.getElementById('proveedores-content').innerHTML = '<div class="empty-msg">Sin datos. Toca Actualizar para cargar.</div>';
+    return;
+  }
+
+  var estadoColors = {'Pasar a buscar':'#f4a259','Vienen a dejar':'#5a8e7d','En bodega':'#a1ac6f','En riesgo':'#bd4a52','—':'#ccc'};
+  var html = '';
+
+  Object.keys(vendorData).sort().forEach(function(vendor) {
+    var estado = vendorMeta[vendor] || '—';
+    var color = estadoColors[estado] || '#ccc';
+    var prods = vendorData[vendor]; // ["2x Nombre producto", ...]
+
+    html += '<div class="prov-card">';
+    html += '<div class="prov-header-title">';
+    html += '<span class="prov-name">' + vendor + '</span>';
+    html += '<span class="prov-estado-badge" style="background:' + color + '20;color:' + color + ';border:1px solid ' + color + '40">' + estado + '</span>';
+    html += '</div>';
+
+    html += '<table class="prov-table">';
+    html += '<thead><tr><th>Producto</th><th>Etiqueta</th></tr></thead>';
+    html += '<tbody>';
+    prods.forEach(function(entry) {
+      // entry is "2x Nombre producto"
+      var pkey = entry + '||' + vendor;
+      var meta = productMeta[pkey] || {};
+      var etiqueta = '';
+      if(meta.c) etiqueta += '<span class="tag tag-c">&#10052; Congelar</span> ';
+      if(meta.r) etiqueta += '<span class="tag tag-r">&#10052; Refrigerar</span> ';
+      if(meta.nota) etiqueta += '<span class="tag tag-nota">&#128203; ' + meta.nota + '</span>';
+
+      html += '<tr>';
+      html += '<td class="prov-prod-name">' + entry + '</td>';
+      html += '<td>' + (etiqueta || '<span style="color:#bbb;font-size:12px">—</span>') + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    html += '</div>';
+  });
+
+  document.getElementById('proveedores-content').innerHTML = html;
+}
+
+// ── TOAST ─────────────────────────────────────────────
+function showT(m) {
+  var t = document.getElementById('toast');
+  t.textContent = m;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+// ── INIT ──────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>

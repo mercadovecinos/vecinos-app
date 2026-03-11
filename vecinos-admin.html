@@ -1,0 +1,1141 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Vecinos · Admin</title><link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
+:root{--gd:#3d5a40;--gm:#5a8e7d;--gl:#cdece2;--gp:#ccdcd6;--ol:#7a9645;--ch:#2a2a2a;--or:#f4a259;--pc:#ffdeb6;--bg:#f4f7f4;--wsp:#075E54;--red:#c0392b}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+html,body{width:100%;overflow-x:hidden}
+body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);padding-bottom:40px;font-size:16px}
+.hdr{background:var(--gd);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 16px rgba(40,70,42,.3);position:sticky;top:0;z-index:100}
+.logo img{height:42px;object-fit:contain}
+.badge{background:rgba(255,255,255,.18);color:white;padding:9px 18px;border-radius:22px;font-size:14px;cursor:pointer;font-weight:700;border:none;font-family:'Readex Pro',sans-serif}
+.tabs{display:flex;background:white;border-bottom:2px solid var(--gp);position:sticky;top:74px;z-index:99;overflow-x:auto}
+.tab{flex:1;min-width:80px;padding:14px 8px;border:none;background:none;font-family:'Readex Pro',sans-serif;font-size:13px;font-weight:700;color:#aaa;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab.active{color:var(--gd);border-bottom-color:var(--gm)}
+.panel{display:none;max-width:600px;margin:0 auto;padding:18px 16px}.panel.active{display:block}
+
+/* ARCHIVO */
+.upload-zone{background:white;border-radius:20px;padding:30px 20px;text-align:center;border:3px dashed var(--gp);cursor:pointer;transition:border-color .2s;margin-bottom:16px}
+.upload-zone.drag{border-color:var(--gm);background:var(--gl)}
+.upload-zone.loaded{border-color:var(--ol);border-style:solid}
+.upload-ico{font-size:48px;margin-bottom:12px}
+.upload-lbl{font-size:18px;font-weight:700;color:var(--gd);margin-bottom:6px}
+.upload-sub{font-size:14px;color:var(--gm);font-weight:500}
+.upload-btn{display:inline-block;margin-top:16px;padding:12px 24px;background:var(--gm);color:white;border-radius:14px;font-family:'Readex Pro',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border:none}
+#fileInput{display:none}
+.archivo-ok{background:var(--gl);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:none}
+.archivo-ok-title{font-size:15px;font-weight:800;color:var(--gd);margin-bottom:10px}
+.vendor-preview{display:flex;flex-direction:column;gap:8px}
+.vendor-row{background:white;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.vendor-name{font-weight:700;font-size:15px;color:var(--ch)}
+.vendor-cnt{font-size:13px;color:var(--gm);font-weight:600;background:var(--gl);padding:3px 10px;border-radius:10px}
+.vm-vendor{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.vm-vendor-header{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;background:white;border-bottom:1px solid var(--gl)}
+.vm-vendor-name{font-weight:700;font-size:15px;color:var(--ch);flex:1}
+.vm-estado-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid #ccc;white-space:nowrap}
+.vm-toggle{font-size:12px;color:var(--gm)}
+.vm-vendor-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.vm-estado-row{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--gm)}
+.vm-estado-sel{flex:1;padding:7px 10px;border-radius:10px;border:1.5px solid var(--gp);font-size:13px;font-family:'Readex Pro',sans-serif;background:white}
+.vm-prods{display:flex;flex-direction:column;gap:6px}
+.vm-prod-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--gl);border-radius:10px;flex-wrap:wrap}
+.vm-prod-name{flex:1;font-size:13px;color:var(--ch);min-width:120px}
+.vm-prod-actions{display:flex;align-items:center;gap:6px}
+.vm-tag-btn{width:28px;height:28px;border-radius:8px;border:2px solid #ddd;background:white;font-weight:800;font-size:12px;cursor:pointer;color:#999;transition:all .15s}
+.vm-tag-btn.active[title="Congelado"]{background:#dbeafe;border-color:#3b82f6;color:#3b82f6}
+.vm-tag-btn.active[title="Refrigerado"]{background:#fce7f3;border-color:#ec4899;color:#ec4899}
+.vm-nota-input{border:1.5px solid #e5e7eb;border-radius:8px;padding:5px 10px;font-size:12px;font-family:'Readex Pro',sans-serif;color:var(--ch);background:white;width:130px;outline:none}
+.vm-nota-input:focus{border-color:var(--gd)}
+.vm-save-btn{background:var(--gd);color:white;border:none;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;align-self:flex-end}
+.save-csv-btn{width:100%;padding:16px;border:none;border-radius:14px;background:var(--gd);color:white;font-family:'Readex Pro',sans-serif;font-size:17px;font-weight:800;cursor:pointer;margin-top:4px}
+
+/* MISIONES */
+.m-form{background:white;border-radius:20px;padding:22px;margin-bottom:16px;box-shadow:0 2px 12px rgba(60,90,60,.1)}
+.m-form h3{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--gm);margin-bottom:18px}
+.m-field{margin-bottom:14px}
+.m-field label{display:block;font-size:13px;font-weight:700;color:var(--gd);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.m-field input,.m-field textarea,.m-field select{width:100%;padding:14px 16px;border:2px solid var(--gp);border-radius:14px;font-family:'Readex Pro',sans-serif;font-size:16px;color:var(--ch);background:var(--bg);transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.m-field input:focus,.m-field textarea:focus,.m-field select:focus{outline:none;border-color:var(--gm);background:white}
+.m-field textarea{resize:vertical;min-height:80px;line-height:1.5}
+.m-field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a8e7d' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+.m-add{width:100%;padding:16px;border:none;border-radius:14px;background:var(--gm);color:white;font-family:'Readex Pro',sans-serif;font-size:17px;font-weight:800;cursor:pointer}
+.m-add:active{transform:scale(.97)}
+.otros-field{display:none}
+.prod-preview{background:var(--gl);border-radius:12px;padding:12px 14px;margin-top:-8px;margin-bottom:14px;font-size:14px;color:var(--gd);line-height:1.7;display:none}
+.prod-preview strong{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--gm);margin-bottom:6px}
+.m-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.m-card{background:white;border-radius:18px;padding:18px;box-shadow:0 2px 10px rgba(60,90,60,.1);border-left:6px solid var(--or);display:flex;gap:14px;align-items:flex-start}
+.m-num{width:36px;height:36px;border-radius:50%;background:var(--pc);color:var(--ch);font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.m-info{flex:1;min-width:0}
+.m-name{font-weight:800;font-size:17px;color:var(--ch);margin-bottom:4px}
+.m-mision{font-size:14px;color:var(--gm);line-height:1.5;margin-bottom:4px}
+.m-prods{font-size:13px;color:#888;line-height:1.5}
+.m-link{font-size:12px;color:var(--gm);opacity:.7;margin-top:3px;word-break:break-all}
+.m-del{width:36px;height:36px;border-radius:10px;border:none;background:#fde8e8;color:var(--red);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.m-empty{text-align:center;padding:28px 20px;color:#aaa;font-size:15px}
+.m-save{width:100%;padding:18px;border:none;border-radius:16px;background:var(--gd);color:white;font-family:'Readex Pro',sans-serif;font-size:18px;font-weight:800;cursor:pointer}
+.m-saved{display:none;background:var(--gl);border-radius:14px;padding:14px;text-align:center;font-size:16px;font-weight:700;color:var(--gd);margin-top:12px}
+.stitle{font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--gd);margin-bottom:14px;padding-top:18px}
+
+/* PROGRESO */
+.fecha{font-size:15px;color:var(--gm);font-weight:600;margin-bottom:16px;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.stat{background:white;border-radius:18px;padding:20px 10px;text-align:center;box-shadow:0 2px 10px rgba(60,90,60,.1)}
+.stat .n{font-size:38px;font-weight:800;color:var(--gm);line-height:1}
+.stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--gd);margin-top:6px;font-weight:700}
+.pbar-wrap{background:var(--gp);border-radius:10px;height:12px;overflow:hidden;margin-bottom:18px}
+.pbar{background:var(--ol);height:100%;border-radius:10px;transition:width .6s}
+.stop{background:white;border-radius:18px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(60,90,60,.08);border-left:6px solid var(--gp)}
+.stop.done{border-left-color:var(--ol)}
+.snum{width:40px;height:40px;border-radius:50%;background:var(--gl);color:var(--gd);font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stop.done .snum{background:var(--ol);color:white}
+.sinfo{flex:1}.sname{font-weight:800;font-size:18px}.ssub{font-size:14px;color:var(--gm);margin-top:4px}.sts{font-size:13px;color:#aaa;margin-top:5px}
+.stag{font-size:11px;font-weight:800;padding:3px 10px;border-radius:12px;margin-left:8px}
+.tt{background:var(--gl);color:var(--gd)}.te{background:#d4edda;color:#1a5e2e}.tr{background:var(--pc);color:#7a4500}
+.tick{font-size:24px;flex-shrink:0;font-weight:800;color:var(--gm)}.stop.done .tick{color:var(--ol)}
+.refresh{font-size:14px;color:var(--gm);text-align:center;margin-top:18px;line-height:1.8;font-weight:500}
+
+.ruta-card{background:white;border-radius:18px;padding:16px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(60,90,60,.1);border-left:6px solid var(--gm);cursor:grab;transition:opacity .2s,transform .15s}
+.ruta-card.dragging{opacity:.4;transform:scale(.97)}
+.ruta-card.drag-over{border-top:3px solid var(--or)}
+.ruta-card.t-rec{border-left-color:var(--or)}
+.ruta-card.t-ret{border-left-color:var(--gp)}
+.ruta-num{width:36px;height:36px;border-radius:50%;background:var(--gl);color:var(--gd);font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ruta-info{flex:1;min-width:0}
+.ruta-name{font-weight:800;font-size:17px;color:var(--ch)}
+.ruta-sub{font-size:13px;color:var(--gm);margin-top:3px}
+.ruta-btns{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.ruta-btn{width:34px;height:34px;border:none;border-radius:10px;background:var(--gp);color:var(--gd);font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ruta-btn:active{transform:scale(.88)}
+.drag-handle{font-size:20px;color:#ccc;cursor:grab;padding:0 4px;flex-shrink:0}
+.toast{position:fixed;top:86px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--gd);color:white;padding:14px 30px;border-radius:36px;font-size:16px;font-weight:700;opacity:0;transition:all .25s;z-index:200;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.ped-card{background:white;border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(60,90,60,.08)}
+.ped-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer}
+.ped-card-name{font-size:16px;font-weight:800;color:var(--gd)}
+.ped-card-num{font-size:13px;color:#888;font-weight:600}
+.ped-prod-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.ped-prod-row:last-child{border-bottom:none}
+.ped-prod-qty{font-weight:700;color:var(--gd);min-width:50px;flex-shrink:0}
+.ped-prod-nom{flex:1;color:#333}
+.ped-prod-del{background:#fde8e8;color:#c0392b;border:none;border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer;flex-shrink:0}
+.ped-prod-edit{background:#e8f4e8;color:var(--gd);border:none;border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer;flex-shrink:0}
+.ped-prod-deleted{opacity:.4;text-decoration:line-through}
+.ped-tag{font-size:12px;padding:3px 10px;border-radius:10px;font-weight:700;margin-left:6px}
+</style></head><body><div class="toast" id="toast"></div><div class="hdr"><div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_7.png?v=1767640340" alt="Vecinos"></div><button class="badge" id="badge">Cargando...</button></div><div class="tabs"><button class="tab active" data-tab="archivo">&#128196; Archivo</button><button class="tab" data-tab="misiones">&#127937; Misiones</button><button class="tab" data-tab="ruta">&#128260; Ruta</button><button class="tab" data-tab="progreso">&#128506; Progreso</button><button class="tab" data-tab="pedidos">&#128230; Pedidos</button></div><div class="panel active" id="panel-archivo"><div class="stitle">Archivo semanal de pedidos</div><div class="upload-zone" id="uploadZone"><div class="upload-ico">&#128196;</div><div class="upload-lbl">Sube el CSV de Shopify</div><div class="upload-sub">Arrastra aqui o toca para seleccionar</div><label class="upload-btn">Seleccionar archivo<input type="file" id="fileInput" accept=".csv"></label></div><div class="archivo-ok" id="archivoOk"><div class="archivo-ok-title">&#10003; Productores encontrados esta semana</div><div class="vendor-preview"></div></div>
+<div style="margin-top:28px;padding-top:20px;border-top:2px solid var(--gp)">
+<div class="stitle" style="color:#bd4a52">Zona de peligro</div>
+<p style="font-size:14px;color:var(--gm);margin:8px 0 14px">Borra toda la información del día actual: paradas, misiones, km y progreso.</p>
+<button onclick="resetTodo()" style="background:#bd4a52;color:white;border:none;border-radius:14px;padding:14px 24px;font-size:16px;font-weight:800;width:100%;cursor:pointer">&#128465; Borrar todo y empezar de cero</button>
+</div></div><div class="panel" id="panel-misiones"><div class="stitle">Misiones de esta semana</div><div class="m-list" id="m-list"><div class="m-empty">Cargando...</div></div><button class="m-save" id="m-save-btn">Guardar misiones</button><div class="m-saved" id="m-saved">&#10003; Misiones guardadas</div><div style="margin-top:24px"><div class="m-form"><h3>Agregar mision</h3><div class="m-field"><label>Lugar / Productor</label><select id="m-lugar-sel"><option value="">Carga el archivo primero...</option></select></div><div class="m-field m-otros-field" id="m-otros-field"><label>Nombre del lugar</label><input type="text" id="m-otros-nombre" placeholder="Ej: Banco Estado, Ferreteria..."></div><div class="prod-preview" id="m-prod-preview"></div><div class="m-field"><label>Mision</label><textarea id="m-mision" placeholder="Ej: Recoger pedido de huevos, depositar pago..."></textarea></div><div class="m-field"><label>Link Google Maps</label><input type="url" id="m-maps" placeholder="Se genera automaticamente"></div><button class="m-add" id="m-add-btn">+ Agregar mision</button></div></div></div><div class="panel" id="panel-ruta">
+<div class="stitle">Orden de paradas</div>
+<div id="ruta-empty" style="text-align:center;padding:30px;color:#aaa;font-size:15px">Carga el CSV primero para ver las paradas</div>
+<div id="ruta-list"></div>
+<button class="save-csv-btn" id="ruta-save-btn" style="display:none;margin-top:8px" onclick="saveRutaOrder()">Guardar orden</button>
+<div id="ruta-saved" style="display:none;background:var(--gl);border-radius:14px;padding:14px;text-align:center;font-size:16px;font-weight:700;color:var(--gd);margin-top:12px">&#10003; Orden guardado</div>
+</div>
+<div class="panel" id="panel-progreso"><div class="fecha" id="fecha">Cargando...</div><div class="stats"><div class="stat"><div class="n" id="sDone">-</div><div class="l">Listas</div></div><div class="stat"><div class="n" id="sTotal">-</div><div class="l">Total</div></div><div class="stat"><div class="n" id="sPct">-</div><div class="l">Avance</div></div></div><div class="pbar-wrap"><div class="pbar" id="pbar" style="width:0%"></div></div><div style="background:white;border-radius:14px;padding:14px 16px;margin:12px 0;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(60,90,60,.08)"><span style="font-size:15px;font-weight:700;color:var(--ch)">&#128230; Pedidos cargados</span><span style="font-size:22px;font-weight:900;color:var(--gd)" id="pedidosCargados">-</span></div><div class="stitle">Picker</div><div id="picker-status" style="margin-bottom:16px"><div class="m-empty" style="padding:12px">Cargando...</div></div><div class="stitle">Estado en tiempo real</div><div id="stops"></div><div id="misiones-status" style="display:none"></div><div id="km-status" style="display:none"></div><div class="refresh">Toca el badge para actualizar &middot; auto cada 60s</div></div><div class="panel" id="panel-pedidos">
+<div style="padding:8px 0 16px">
+  <div class="stitle" style="margin-bottom:12px">Pedidos del día</div>
+  <div id="pedidos-loading" style="color:#888;font-size:15px;padding:8px 0">Cargando...</div>
+  <div id="pedidos-list"></div>
+  <div style="margin-top:16px;display:none" id="pedidos-save-wrap">
+    <button onclick="saveProdOverrides()" style="background:var(--gd);color:white;border:none;padding:14px 24px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;width:100%;margin-bottom:8px">&#128190; Guardar cambios</button>
+  <button onclick="applyOverridesToRuta()" style="background:#5a8e7d;color:white;border:none;padding:12px 24px;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;width:100%">&#128260; Aplicar puntos nuevos a la Ruta</button>
+  </div>
+</div>
+</div><script>
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykqQLxkNidUZnmcXADFvUmuuAfvs5rk8eebEL9OG7uh4-6eXGG1e0nc_1oESEG4NvT/exec';
+var RUTA_ID    = '';   // set when CSV is uploaded or loaded from GAS
+var FECHA      = '';   // display date for current ruta
+var PARADAS    = [];
+var misiones   = [];
+var vendorData = {};
+var prodOverrides = {}; // {orderKey: {deleted:[idx], qty:{idx:newQty}, orderDeleted:bool, direccion:str}}
+var vendorMeta    = {}; // {vendorName: estado}
+var productMeta   = {}; // {"prodName||vendorName": {c, r, nota}}
+
+// ── TABS ────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'progreso') loadProgress();
+    if (tab.dataset.tab === 'ruta' && !rutaParadas.length) loadRutaFromConfig();
+  });
+});
+
+// ── CSV UPLOAD ───────────────────────────────────────────────────────
+var uploadZone = document.getElementById('uploadZone');
+var fileInput  = document.getElementById('fileInput');
+
+uploadZone.addEventListener('click', function(){ fileInput.click(); });
+uploadZone.addEventListener('dragover', function(e){ e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', function(){ uploadZone.classList.remove('drag'); });
+uploadZone.addEventListener('drop', function(e){
+  e.preventDefault(); uploadZone.classList.remove('drag');
+  if (e.dataTransfer.files[0]) processCSV(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', function(){
+  if (fileInput.files[0]) processCSV(fileInput.files[0]);
+});
+
+function processCSV(file) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var text = e.target.result;
+    var lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+    var headers = parseCSVLine(lines[0]);
+    var vendorIdx  = headers.indexOf('Vendor');
+    var itemIdx    = headers.indexOf('Lineitem name');
+    var qtyIdx     = headers.indexOf('Lineitem quantity');
+    var nameIdx    = headers.indexOf('Shipping Name');
+    var addr1Idx   = headers.indexOf('Shipping Address1');
+    var addr2Idx   = headers.indexOf('Shipping Address2');
+    var cityIdx    = headers.indexOf('Shipping City');
+    var phoneIdx   = headers.indexOf('Shipping Phone');
+    var notesIdx   = headers.indexOf('Notes');
+    var orderIdx   = headers.indexOf('Name');
+    var methodIdx  = headers.indexOf('Shipping Method');
+    var totalIdx   = headers.indexOf('Total');
+    var statusIdx  = headers.indexOf('Financial Status');
+    var bname1Idx  = headers.indexOf('Billing Name');
+    var baddr1Idx  = headers.indexOf('Billing Address1');
+    var bcityIdx   = headers.indexOf('Billing City');
+    var bphoneIdx  = headers.indexOf('Billing Phone');
+
+    if (vendorIdx === -1 || itemIdx === -1) {
+      showT('Error: archivo no reconocido');
+      return;
+    }
+
+    // Generate new RUTA_ID and FECHA from today's date
+    var today   = new Date();
+    var yy      = today.getFullYear();
+    var mm      = String(today.getMonth()+1).padStart(2,'0');
+    var dd      = String(today.getDate()).padStart(2,'0');
+    var newRutaId = 'ruta-' + yy + '-' + mm + '-' + dd;
+    var dias    = ['domingo','lunes','martes','mi\u00e9rcoles','jueves','viernes','s\u00e1bado'];
+    var meses   = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    var newFecha = dias[today.getDay()].charAt(0).toUpperCase()+dias[today.getDay()].slice(1)+' '+today.getDate()+' de '+meses[today.getMonth()]+', '+yy;
+
+    // Parse vendors
+    vendorData = {};
+    // Parse orders for paradas
+    // NOTE: Shopify CSV only puts customer data on the first row per order
+    // subsequent rows (one per line item) have blank shipping fields
+    var orders = {};
+    var lastOrderData = {}; // carry forward customer data for multi-row orders
+    for (var i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      var cols = parseCSVLine(lines[i]);
+      var v     = (cols[vendorIdx]  || '').trim();
+      var item  = (cols[itemIdx]    || '').trim();
+      var qty   = (cols[qtyIdx]     || '1').trim();
+      var oNum  = (cols[orderIdx]   || '').trim();
+
+      if (v && item && v !== 'Vecinos') {
+        if (!vendorData[v]) vendorData[v] = [];
+        var entry = qty + 'x ' + item;
+        if (vendorData[v].indexOf(entry) === -1) vendorData[v].push(entry);
+      }
+
+      if (!oNum || oNum[0] !== '#') continue;
+
+      // Only read customer fields from rows that have them (first row per order)
+      var sName = (cols[nameIdx]    || cols[bname1Idx] || '').trim();
+      var sAddr = (cols[addr1Idx]   || cols[baddr1Idx] || '').trim();
+      var sAddr2= (cols[addr2Idx]   || '').trim();
+      var sCity = (cols[cityIdx]    || cols[bcityIdx]  || '').trim();
+      var phone = (cols[phoneIdx]   || cols[bphoneIdx] || '').trim();
+      var notes = (cols[notesIdx]   || '').trim();
+      var method= (cols[methodIdx]  || '').trim();
+      var total = parseInt(cols[totalIdx] || '0') || 0;
+      var status= (cols[statusIdx]  || '').trim();
+
+      // Resolve name/addr using shipping first, billing as fallback
+      var resolvedName  = sName  || (cols[bname1Idx] ? cols[bname1Idx].trim() : '');
+      var resolvedAddr  = sAddr  || (cols[baddr1Idx] ? cols[baddr1Idx].trim() : '');
+      var resolvedCity  = sCity  || (cols[bcityIdx]  ? cols[bcityIdx].trim()  : '');
+      var resolvedPhone = phone  || (cols[bphoneIdx] ? cols[bphoneIdx].trim() : '');
+
+      if (!orders[oNum]) {
+        // Always create order on first row seen, even if data is blank
+        orders[oNum] = { orderNum:oNum, custName:resolvedName, addr1:resolvedAddr, addr2:sAddr2, city:resolvedCity, phone:resolvedPhone, notes:notes, method:method, total:total, status:status, items:[] };
+      } else {
+        // Fill in any missing fields from subsequent rows
+        if (!orders[oNum].custName && resolvedName)  orders[oNum].custName = resolvedName;
+        if (!orders[oNum].addr1   && resolvedAddr)   orders[oNum].addr1    = resolvedAddr;
+        if (!orders[oNum].city    && resolvedCity)   orders[oNum].city     = resolvedCity;
+        if (!orders[oNum].phone   && resolvedPhone)  orders[oNum].phone    = resolvedPhone;
+        if (!orders[oNum].method  && method)         orders[oNum].method   = method;
+        if (!orders[oNum].total   && total)          orders[oNum].total    = total;
+        if (!orders[oNum].status  && status)         orders[oNum].status   = status;
+      }
+
+      if (item) orders[oNum].items.push({ nombre:item, qty:qty, vendor:v });
+    }
+
+    // Build paradas
+    var PICKUP_POINTS = { 'la yunta':'La Yunta', 'café manduca':'Café Manduca', 'cafe manduca':'Café Manduca', 'laden market':'Laden Market' };
+    var pickups = {}, entregas = [], pid = 1;
+
+    Object.keys(orders).forEach(function(oNum) {
+      var o = orders[oNum];
+      var method = (o.method || '').toLowerCase();
+      var isPickup = false;
+      var pickupLabel = '';
+      Object.keys(PICKUP_POINTS).forEach(function(k) {
+        if (method.indexOf(k) !== -1) { isPickup = true; pickupLabel = PICKUP_POINTS[k]; }
+      });
+
+      if (isPickup) {
+        if (!pickups[pickupLabel]) pickups[pickupLabel] = [];
+        pickups[pickupLabel].push(o);
+      } else {
+        entregas.push(o);
+      }
+    });
+
+    var paradas = [];
+    Object.keys(pickups).forEach(function(label) {
+      var mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(label + ', Puerto Varas');
+      paradas.push({ id:pid++, tipo:'punto-retiro', nombre:label, direccion:label, mapUrl:mapUrl, telefono:'', notas:'', clientes: pickups[label].map(function(o) {
+        return { orderNum:o.orderNum, custName:o.custName, phone:o.phone, productos:o.items.map(function(it){ return {nombre:it.nombre, qty:it.qty+' unid.'}; }), pago:{monto:0, metodo:'Ya pagado online'} };
+      })});
+    });
+
+    entregas.forEach(function(o) {
+      var addr = [o.addr1, o.addr2, o.city].filter(Boolean).join(', ');
+      var mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr);
+      var cobrar = (o.status !== 'paid' && o.total > 0);
+      paradas.push({ id:pid++, tipo:'entrega', orderNum:o.orderNum, nombre:o.custName, direccion:addr, telefono:o.phone, mapUrl:mapUrl, notas:o.notes, pago:{monto:cobrar?o.total:0, metodo:cobrar?'Cobrar en entrega':'Ya pagado online'}, productos:o.items.map(function(it){ return {nombre:it.nombre, qty:it.qty+' unid.'}; }) });
+    });
+
+    // Update local state
+    RUTA_ID = newRutaId;
+    FECHA   = newFecha;
+
+    // Save everything to Apps Script in one call
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action:'newRuta', ruta_id:newRutaId, fecha:newFecha, paradas:paradas, vendors:vendorData })
+    }).then(function(r){ return r.json(); })
+    .then(function(res){
+      if (res.ok) showT('Nueva ruta creada: ' + newFecha);
+      else showT('Error guardando ruta');
+    }).catch(function(){ showT('Error de conexion'); });
+
+    rutaParadas = paradas; renderRutaList();
+    showArchivoOk(file.name, newFecha);
+    updateVendorSelect();
+    renderPedidos();
+    showT('Cargando... ' + Object.keys(vendorData).length + ' productores');
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVLine(line) {
+  var result = [], cur = '', inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    var c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur);
+  return result;
+}
+
+function showArchivoOk(filename, fecha) {
+  uploadZone.classList.add('loaded');
+  uploadZone.querySelector('.upload-lbl').textContent = '\u2713 ' + filename;
+  uploadZone.querySelector('.upload-sub').textContent = (fecha ? fecha + ' · ' : '') + Object.keys(vendorData).length + ' productores encontrados';
+  var ok = document.getElementById('archivoOk');
+  ok.style.display = 'block';
+  renderProductorSection();
+}
+
+function renderProductorSection() {
+  var ok = document.getElementById('archivoOk');
+  var html = '';
+  var ESTADOS = ['—', 'Pasar a buscar', 'Vienen a dejar', 'En bodega', 'En riesgo'];
+  Object.keys(vendorData).sort().forEach(function(v) {
+    var vEstado = vendorMeta[v] || '—';
+    var estadoColor = {'Pasar a buscar':'#f4a259','Vienen a dejar':'#5a8e7d','En bodega':'#a1ac6f','En riesgo':'#bd4a52','—':'#ccc'}[vEstado] || '#ccc';
+    html += '<div class="vm-vendor" id="vm-' + encodeURIComponent(v) + '">';
+    html += '<div class="vm-vendor-header" onclick="toggleVendorSection(this)">';
+    html += '<span class="vm-vendor-name">' + v + '</span>';
+    html += '<span class="vm-estado-badge" style="background:' + estadoColor + '20;color:' + estadoColor + ';border:1px solid ' + estadoColor + '40">' + vEstado + '</span>';
+    html += '<span class="vm-toggle">▾</span>';
+    html += '</div>';
+    html += '<div class="vm-vendor-body">';
+    // Estado dropdown
+    html += '<div class="vm-estado-row"><label>Estado recepción:</label><select class="vm-estado-sel" onchange="setVendorEstado(\'' + v.replace(/'/g,"\\'") + '\', this.value)">';
+    ESTADOS.forEach(function(e) {
+      html += '<option value="' + e + '"' + (vEstado===e?' selected':'') + '>' + e + '</option>';
+    });
+    html += '</select></div>';
+    // Products list
+    var productos = vendorData[v];
+    html += '<div class="vm-prods">';
+    productos.forEach(function(prod) {
+      var key = prod + '||' + v;
+      var meta = productMeta[key] || {};
+      html += '<div class="vm-prod-row" data-key="' + key + '">';
+      html += '<span class="vm-prod-name">' + prod + '</span>';
+      html += '<div class="vm-prod-actions">';
+      html += '<button class="vm-tag-btn' + (meta.c?' active':'') + '" onclick="toggleProdTag(\'' + key.replace(/'/g,"\\'") + '\',\'c\')" title="Congelado">C</button>';
+      html += '<button class="vm-tag-btn' + (meta.r?' active':'') + '" onclick="toggleProdTag(\'' + key.replace(/'/g,"\\'") + '\',\'r\')" title="Refrigerado">R</button>';
+      html += '<input class="vm-nota-input" type="text" placeholder="Nota..." value="' + (meta.nota||'').replace(/"/g,'&quot;') + '" onchange="setProdNota(\'' + key.replace(/'/g,"\\'") + '\', this.value)">';
+      html += '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+  });
+  var saveBtn = '<button class="vm-save-btn" style="width:100%;margin-bottom:16px" onclick="saveVendorMeta()">&#128190; Guardar cambios de productores</button>';
+  ok.querySelector('.vendor-preview').innerHTML = saveBtn + html + saveBtn;
+}
+
+function toggleVendorSection(header) {
+  var body = header.nextElementSibling;
+  var toggle = header.querySelector('.vm-toggle');
+  if (body.style.display === 'none') { body.style.display = ''; toggle.textContent = '▾'; }
+  else { body.style.display = 'none'; toggle.textContent = '▸'; }
+}
+
+function setVendorEstado(vendor, estado) {
+  vendorMeta[vendor] = estado;
+  // Update badge color immediately
+  var vEl = document.getElementById('vm-' + encodeURIComponent(vendor));
+  if (vEl) {
+    var badge = vEl.querySelector('.vm-estado-badge');
+    var color = {'Pasar a buscar':'#f4a259','Vienen a dejar':'#5a8e7d','En bodega':'#a1ac6f','En riesgo':'#bd4a52','—':'#ccc'}[estado] || '#ccc';
+    badge.style.background = color + '20'; badge.style.color = color; badge.style.borderColor = color + '40';
+    badge.textContent = estado;
+  }
+}
+
+function toggleProdTag(key, tag) {
+  if (!productMeta[key]) productMeta[key] = {};
+  productMeta[key][tag] = !productMeta[key][tag];
+  // Update button
+  var row = document.querySelector('[data-key="' + key + '"]');
+  if (row) {
+    var btn = row.querySelector('.vm-tag-btn[title="' + (tag==='c'?'Congelado':'Refrigerado') + '"]');
+    if (btn) btn.classList.toggle('active', !!productMeta[key][tag]);
+  }
+}
+
+function setProdNota(key, nota) {
+  if (!productMeta[key]) productMeta[key] = {};
+  productMeta[key].nota = nota;
+}
+
+function saveVendorMeta() {
+  var p1 = fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) })
+    .then(function(r){ return r.json(); });
+  var p2 = fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) })
+    .then(function(r){ return r.json(); });
+  Promise.all([p1, p2])
+    .then(function(results) {
+      var allOk = results.every(function(r){ return r.ok; });
+      showT(allOk ? '\u2713 Cambios de productores guardados' : 'Algunos cambios no se guardaron');
+    })
+    .catch(function(){ showT('Error al guardar productores'); });
+}
+
+function loadVendorAndProductMeta(cb) {
+  var done = 0;
+  function check() { done++; if (done === 2 && cb) cb(); }
+  fetch(SCRIPT_URL + '?action=vendorMeta')
+    .then(function(r){ return r.json(); })
+    .then(function(res){ if (res && res.meta) vendorMeta = res.meta; check(); })
+    .catch(check);
+  fetch(SCRIPT_URL + '?action=productMeta')
+    .then(function(r){ return r.json(); })
+    .then(function(res){ if (res && res.meta) productMeta = res.meta; check(); })
+    .catch(check);
+}
+
+// ── VENDOR SELECT ───────────────────────────────────────────────────
+function updateVendorSelect() {
+  var sel = document.getElementById('m-lugar-sel');
+  sel.innerHTML = '<option value="">Selecciona un productor...</option>';
+  Object.keys(vendorData).sort().forEach(function(v) {
+    var opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    sel.appendChild(opt);
+  });
+  var opt2 = document.createElement('option');
+  opt2.value = 'otros'; opt2.textContent = '-- Otro lugar --';
+  sel.appendChild(opt2);
+}
+
+document.getElementById('m-lugar-sel').addEventListener('change', function() {
+  var v = this.value;
+  var otrosField = document.getElementById('m-otros-field');
+  var prodPreview = document.getElementById('m-prod-preview');
+  var mapsInput = document.getElementById('m-maps');
+
+  if (v === 'otros') {
+    otrosField.style.display = 'block';
+    prodPreview.style.display = 'none';
+    mapsInput.value = '';
+  } else if (v) {
+    otrosField.style.display = 'none';
+    // Show products
+    var prods = vendorData[v] || [];
+    prodPreview.style.display = 'block';
+    prodPreview.innerHTML = '<strong>Productos a recoger</strong>' + prods.join('<br>');
+    // Auto-generate Maps link
+    mapsInput.value = 'https://www.google.com/maps/search/' + encodeURIComponent(v + ', Puerto Varas, Chile');
+  } else {
+    otrosField.style.display = 'none';
+    prodPreview.style.display = 'none';
+    mapsInput.value = '';
+  }
+});
+
+// ── ADD MISION ───────────────────────────────────────────────────────
+document.getElementById('m-add-btn').addEventListener('click', function() {
+  var sel     = document.getElementById('m-lugar-sel').value;
+  var otros   = document.getElementById('m-otros-nombre').value.trim();
+  var mision  = document.getElementById('m-mision').value.trim();
+  var maps    = document.getElementById('m-maps').value.trim();
+
+  var nombre = sel === 'otros' ? otros : sel;
+  if (!nombre) { showT('Selecciona o ingresa un lugar'); return; }
+  if (!mision) { showT('Describe la mision'); return; }
+
+  var prods = (sel !== 'otros' && vendorData[sel]) ? vendorData[sel] : [];
+  if (!maps && nombre) {
+    maps = 'https://www.google.com/maps/search/' + encodeURIComponent(nombre + ', Puerto Varas, Chile');
+  }
+
+  misiones.push({ nombre:nombre, mision:mision, maps:maps, productos:prods });
+
+  // Reset form
+  document.getElementById('m-lugar-sel').value = '';
+  document.getElementById('m-otros-nombre').value = '';
+  document.getElementById('m-mision').value = '';
+  document.getElementById('m-maps').value = '';
+  document.getElementById('m-otros-field').style.display = 'none';
+  document.getElementById('m-prod-preview').style.display = 'none';
+
+  renderMisiones();
+  showT('Mision agregada');
+});
+
+function renderMisiones() {
+  var list = document.getElementById('m-list');
+  if (misiones.length === 0) {
+    list.innerHTML = '<div class="m-empty">No hay misiones aun. Agrega la primera abajo.</div>';
+    return;
+  }
+  list.innerHTML = misiones.map(function(m, i) {
+    var prodsHtml = m.productos && m.productos.length
+      ? '<div class="m-prods">&#128230; ' + m.productos.join(', ') + '</div>' : '';
+    var linkHtml = m.maps
+      ? '<div class="m-link">&#128279; <a href="'+m.maps+'" target="_blank" style="color:var(--gd)">Ver en Maps</a></div>' : '';
+    return '<div class="m-card" style="flex-wrap:wrap">' +
+      '<div class="m-num">' + (i+1) + '</div>' +
+      '<div class="m-info" style="flex:1;min-width:0">' +
+        '<div class="m-name">' + m.nombre + '</div>' +
+        '<div class="m-mision">' + m.mision + '</div>' +
+        prodsHtml + linkHtml +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">' +
+        '<button class="m-del" data-up-idx="'+i+'" style="background:var(--gp);color:var(--gd)" '+(i===0?'disabled style="opacity:.3"':'')+'>&#8593;</button>' +
+        '<button class="m-del" data-dn-idx="'+i+'" style="background:var(--gp);color:var(--gd)" '+(i===misiones.length-1?'disabled style="opacity:.3"':'')+'>&#8595;</button>' +
+        '<button class="m-del" data-edit-idx="'+i+'" style="background:#e8f4e8;color:var(--gd)">&#9998;</button>' +
+        '<button class="m-del" data-del-idx="'+i+'">&#10005;</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+document.addEventListener('click', function(e) {
+  var upBtn  = e.target.closest('[data-up-idx]');
+  var dnBtn  = e.target.closest('[data-dn-idx]');
+  var delBtn = e.target.closest('[data-del-idx]');
+  if (upBtn) {
+    var i = parseInt(upBtn.dataset.upIdx);
+    if (i === 0) return;
+    var tmp = misiones[i-1]; misiones[i-1] = misiones[i]; misiones[i] = tmp;
+    renderMisiones(); showT('Movida arriba');
+  } else if (dnBtn) {
+    var i = parseInt(dnBtn.dataset.dnIdx);
+    if (i === misiones.length-1) return;
+    var tmp = misiones[i+1]; misiones[i+1] = misiones[i]; misiones[i] = tmp;
+    renderMisiones(); showT('Movida abajo');
+  } else if (e.target.closest('[data-edit-idx]')) {
+    var editBtn = e.target.closest('[data-edit-idx]');
+    var i = parseInt(editBtn.dataset.editIdx);
+    var m = misiones[i];
+    var newNombre = prompt('Nombre del lugar:', m.nombre);
+    if (newNombre === null) return;
+    var newMision = prompt('Mision:', m.mision);
+    if (newMision === null) return;
+    var newMaps = prompt('Link Google Maps:', m.maps || '');
+    misiones[i] = { nombre: newNombre.trim(), mision: newMision.trim(), maps: newMaps ? newMaps.trim() : '', productos: m.productos || [] };
+    renderMisiones(); showT('Mision actualizada');
+  } else if (delBtn) {
+    var i = parseInt(delBtn.dataset.delIdx);
+    if (!confirm('\u00bfEliminar "'+misiones[i].nombre+'"?')) return;
+    misiones.splice(i, 1);
+    renderMisiones(); showT('Eliminada');
+  }
+});
+
+document.getElementById('m-save-btn').addEventListener('click', function() {
+  var btn = this;
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action:'saveMisiones', misiones:misiones, ruta_id:RUTA_ID })
+  }).then(function(r){ return r.json(); })
+  .then(function() {
+    btn.disabled = false; btn.textContent = 'Guardar misiones';
+    document.getElementById('m-saved').style.display = 'block';
+    setTimeout(function(){ document.getElementById('m-saved').style.display = 'none'; }, 3000);
+    showT('&#10003; Guardado');
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Guardar misiones';
+    showT('Error al guardar');
+  });
+});
+
+// ── PROGRESO ─────────────────────────────────────────────────────────
+function loadData() {
+  fetch(SCRIPT_URL + '?action=paradas')
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      if (!res.ok) throw new Error(res.error || 'Sin datos');
+      PARADAS = res.paradas; RUTA_ID = res.ruta_id; FECHA = res.fecha;
+      document.getElementById('fecha').textContent = res.fecha || 'Sin ruta activa';
+      loadPedidos();
+      loadProgress();
+      if (RUTA_ID) {
+        fetch(SCRIPT_URL + '?action=vendors&ruta_id=' + encodeURIComponent(RUTA_ID))
+          .then(function(r){ return r.json(); })
+          .then(function(res2){
+            if (res2.vendors && Object.keys(res2.vendors).length) {
+              vendorData = res2.vendors;
+              updateVendorSelect();
+            }
+          }).catch(function(){});
+      }
+    }).catch(function(){ document.getElementById('badge').textContent = 'Error cargando ruta'; });
+}
+
+function loadProgress() {
+  document.getElementById('badge').textContent = 'Actualizando...';
+  fetch(SCRIPT_URL + '?ruta_id=' + encodeURIComponent(RUTA_ID))
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      var data = res.data || {}, done = 0, html = '';
+      PARADAS.forEach(function(p, i) {
+        var est = data[String(p.id)], isDone = est && est.estado === 'completado';
+        if (isDone) done++;
+        var tag = p.tipo==='punto-retiro'?'<span class="stag tt">Retiro</span>':p.tipo==='recogida'?'<span class="stag tr">Recoger</span>':'<span class="stag te">Entrega</span>';
+        var ts = isDone && est.timestamp ? '<div class="sts">&#10003; ' + est.timestamp + '</div>' : '<div class="sts">Pendiente...</div>';
+        html += '<div class="stop'+(isDone?' done':'')+'"><div class="snum">'+(isDone?'&#10003;':(i+1))+'</div><div class="sinfo"><div class="sname">'+(p.nombre||'')+tag+'</div><div class="ssub">'+(p.direccion||'')+'</div>'+ts+'</div><div class="tick">'+(isDone?'&#10003;':'...')+'</div></div>';
+      });
+      document.getElementById('stops').innerHTML = html || '<div class="m-empty">Sin paradas aun</div>';
+      var total = PARADAS.length;
+      document.getElementById('sDone').textContent = done;
+      document.getElementById('sTotal').textContent = total;
+      document.getElementById('sPct').textContent = total ? Math.round(done/total*100)+'%' : '-';
+      document.getElementById('pbar').style.width = total ? (done/total*100)+'%' : '0%';
+      var now = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+      document.getElementById('badge').textContent = 'Actualizado ' + now;
+      document.getElementById('pedidosCargados').textContent = done + ' / ' + total;
+      loadMisionesStatus();
+      loadKmStatus();
+      loadPickerStatus();
+    }).catch(function(){ document.getElementById('badge').textContent = 'Error - toca para reintentar'; });
+}
+
+function loadPickerStatus() {
+  fetch(SCRIPT_URL + '?action=pickerProgress&ruta_id=' + encodeURIComponent(RUTA_ID))
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      var progress = (res && res.progress) ? res.progress : {};
+      var orders = [];
+      PARADAS.forEach(function(p) {
+        if(p.tipo === 'punto-retiro') {
+          (p.clientes || []).forEach(function(cl) {
+            orders.push({ key: cl.orderNum, total: (cl.productos || []).length });
+          });
+        } else if(p.tipo === 'entrega') {
+          orders.push({ key: '#'+p.id, total: (p.productos || []).length });
+        }
+      });
+      var preparados = 0, incompletos = 0, pendientes = 0;
+      orders.forEach(function(o) {
+        var checked = (progress[o.key] || []).length;
+        if(checked >= o.total && o.total > 0) preparados++;
+        else if(checked > 0) incompletos++;
+        else pendientes++;
+      });
+      var total = orders.length;
+      var wrap = document.getElementById('picker-status');
+      if(!total) { wrap.innerHTML = '<div class="m-empty" style="padding:12px">Sin pedidos</div>'; return; }
+      var pct = Math.round(preparados/total*100);
+      var html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">';
+      html += '<div class="stat"><div class="n" style="color:var(--ol)">' + preparados + '</div><div class="l">Preparados</div></div>';
+      html += '<div class="stat"><div class="n" style="color:var(--or)">' + incompletos + '</div><div class="l">Incompletos</div></div>';
+      html += '<div class="stat"><div class="n" style="color:#aaa">' + pendientes + '</div><div class="l">Pendientes</div></div>';
+      html += '</div>';
+      html += '<div class="pbar-wrap"><div class="pbar" style="width:' + pct + '%;background:var(--ol)"></div></div>';
+      html += '<div style="text-align:right;font-size:12px;color:var(--gm);margin-top:4px;font-weight:700">' + pct + '% preparado</div>';
+      wrap.innerHTML = html;
+    }).catch(function() {
+      var wrap = document.getElementById('picker-status');
+      if(wrap) wrap.innerHTML = '<div class="m-empty" style="padding:12px;color:#aaa">Sin datos del picker</div>';
+    });
+}
+
+function loadMisionesStatus() {
+  fetch(SCRIPT_URL + '?action=misiones')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      var mis = res.misiones || [];
+      var misDone = res.misionesDone || {};
+      var wrap = document.getElementById('misiones-status');
+      if (mis.length === 0) { wrap.style.display='none'; return; }
+      wrap.style.display = 'block';
+      var doneCount = Object.keys(misDone).length;
+      var h2 = '<div class="stitle" style="margin-top:8px">Misiones ('+doneCount+'/'+mis.length+')</div>';
+      mis.forEach(function(m, i) {
+        var ok = !!misDone[i];
+        h2 += '<div class="stop'+(ok?' done':'')+'"><div class="snum" style="background:'+(ok?'var(--ol)':'var(--gp)')+';color:'+(ok?'white':'var(--gd)')+'">'+( ok?'\u2713':(i+1))+'</div><div class="sinfo"><div class="sname" style="'+(ok?'text-decoration:line-through;color:var(--gm)':'')+'">'+m.nombre+'</div><div class="ssub">'+m.mision+'</div></div><div class="tick" style="color:'+(ok?'var(--ol)':'var(--or)')+'">'+( ok?'\u2713':'\u25cb')+'</div></div>';
+      });
+      wrap.innerHTML = h2;
+    }).catch(function(){});
+}
+
+function loadKmStatus() {
+  fetch(SCRIPT_URL + '?action=km')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      var km = res.km || {};
+      var wrap = document.getElementById('km-status');
+      if (!wrap) return;
+      var ki = km.kmInicio || '--', kf = km.kmFin || '--';
+      var diff = (ki !== '--' && kf !== '--' && parseInt(kf) > parseInt(ki)) ? (parseInt(kf)-parseInt(ki)) : null;
+      var pago = diff ? '$'+(25000+diff*200).toLocaleString('es-CL') : '--';
+      wrap.style.display = 'block';
+      wrap.innerHTML = '<div class="stitle" style="margin-top:8px">Kilometraje</div>' +
+        '<div class="stop"><div class="sinfo"><div class="sname">Km inicio</div></div><div class="tick">'+ki+'</div></div>' +
+        '<div class="stop"><div class="sinfo"><div class="sname">Km fin</div></div><div class="tick">'+kf+'</div></div>' +
+        (diff?'<div class="stop"><div class="sinfo"><div class="sname">Total recorrido</div></div><div class="tick">'+diff.toLocaleString('es-CL')+' km</div></div>':'') +
+        (diff?'<div class="stop" style="background:var(--gl)"><div class="sinfo"><div class="sname" style="font-weight:800">\u{1F4B0} Pago estimado</div></div><div class="tick" style="font-weight:800;color:var(--gd)">'+pago+'</div></div>':'');
+    }).catch(function(){});
+}
+
+document.getElementById('badge').addEventListener('click', loadProgress);
+setInterval(loadProgress, 60000);
+
+// Load existing misiones and vendor data
+// ── RUTA REORDER ─────────────────────────────────────────────────────
+var rutaParadas = []; // current ordered paradas
+var dragSrc = null;
+
+function renderRutaList() {
+  var list = document.getElementById('ruta-list');
+  var empty = document.getElementById('ruta-empty');
+  var btn = document.getElementById('ruta-save-btn');
+  if (!rutaParadas.length) { list.innerHTML=''; empty.style.display='block'; btn.style.display='none'; return; }
+  empty.style.display = 'none'; btn.style.display = 'block';
+  // Filter deleted orders from ruta
+  var rutaFiltrada = rutaParadas.map(function(p) {
+    if (p.tipo === 'punto-retiro') {
+      var clientesFiltrados = (p.clientes||[]).filter(function(cl) {
+        var ov = prodOverrides[cl.orderNum];
+        return !ov || !ov.orderDeleted;
+      });
+      return Object.assign({}, p, {clientes: clientesFiltrados});
+    }
+    var ovE = prodOverrides['#' + p.id];
+    if (ovE && ovE.orderDeleted) return null;
+    return p;
+  }).filter(function(p){ return p !== null && (p.tipo !== 'punto-retiro' || p.clientes.length > 0); });
+
+  list.innerHTML = rutaFiltrada.map(function(p, i) {
+    var tClass = p.tipo==='recogida'?'t-rec':p.tipo==='punto-retiro'?'t-ret':'';
+    var tag = p.tipo==='punto-retiro'?'Retiro':p.tipo==='recogida'?'Recoger':'Entrega';
+    var sub = p.tipo==='punto-retiro'
+      ? (p.clientes||[]).map(function(c){return c.custName;}).join(', ')
+      : (p.direccion||'');
+    return '<div class="ruta-card '+tClass+'" draggable="true" data-ri="'+i+'">' +
+      '<div class="drag-handle">&#8942;&#8942;</div>' +
+      '<div class="ruta-num">'+(i+1)+'</div>' +
+      '<div class="ruta-info"><div class="ruta-name">'+(p.nombre||p.custName||'')+'</div>' +
+      '<div class="ruta-sub"><span style="font-size:11px;font-weight:800;background:var(--gl);padding:2px 8px;border-radius:8px;margin-right:6px">'+tag+'</span>'+sub+'</div></div>' +
+      '<div class="ruta-btns">' +
+        '<button class="ruta-btn" data-up="'+i+'" '+(i===0?'style="opacity:.2;pointer-events:none"':'')+'>&#8593;</button>' +
+        '<button class="ruta-btn" data-dn="'+i+'" '+(i===rutaFiltrada.length-1?'style="opacity:.2;pointer-events:none"':'')+'>&#8595;</button>' +
+        '<button class="ruta-btn" data-del="'+i+'" style="background:#fde8e8;color:#bd4a52">&#10005;</button>' +
+      '</div></div>';
+  }).join('');
+
+  // Delete/Up/Down buttons operate on rutaFiltrada indices
+  list.querySelectorAll('[data-del]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var i    = parseInt(this.dataset.del);
+      var item = rutaFiltrada[i];
+      var nombre = item.nombre || item.custName || 'esta parada';
+      if (!confirm('\u00bfEliminar "' + nombre + '"?')) return;
+      var srcIdx = rutaParadas.indexOf(item);
+      if (srcIdx >= 0) rutaParadas.splice(srcIdx, 1);
+      renumberParadas(); renderRutaList(); showT('Parada eliminada');
+    });
+  });
+
+  list.querySelectorAll('[data-up]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var i = parseInt(this.dataset.up);
+      if (i === 0) return;
+      var a = rutaParadas.indexOf(rutaFiltrada[i]);
+      var b = rutaParadas.indexOf(rutaFiltrada[i-1]);
+      if (a < 0 || b < 0) return;
+      var tmp = rutaParadas[a]; rutaParadas[a] = rutaParadas[b]; rutaParadas[b] = tmp;
+      renumberParadas(); renderRutaList(); showT('Movida arriba');
+    });
+  });
+  list.querySelectorAll('[data-dn]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var i = parseInt(this.dataset.dn);
+      if (i === rutaFiltrada.length-1) return;
+      var a = rutaParadas.indexOf(rutaFiltrada[i]);
+      var b = rutaParadas.indexOf(rutaFiltrada[i+1]);
+      if (a < 0 || b < 0) return;
+      var tmp = rutaParadas[a]; rutaParadas[a] = rutaParadas[b]; rutaParadas[b] = tmp;
+      renumberParadas(); renderRutaList(); showT('Movida abajo');
+    });
+  });
+
+  // Drag & drop
+  list.querySelectorAll('.ruta-card').forEach(function(card) {
+    card.addEventListener('dragstart', function() { dragSrc = this; this.classList.add('dragging'); });
+    card.addEventListener('dragend',   function() { this.classList.remove('dragging'); list.querySelectorAll('.ruta-card').forEach(function(c){ c.classList.remove('drag-over'); }); });
+    card.addEventListener('dragover',  function(e) { e.preventDefault(); this.classList.add('drag-over'); });
+    card.addEventListener('dragleave', function()  { this.classList.remove('drag-over'); });
+    card.addEventListener('drop', function(e) {
+      e.preventDefault(); this.classList.remove('drag-over');
+      if (!dragSrc || dragSrc === this) return;
+      var from = parseInt(dragSrc.dataset.ri);
+      var to   = parseInt(this.dataset.ri);
+      var moved = rutaParadas.splice(from, 1)[0];
+      rutaParadas.splice(to, 0, moved);
+      renumberParadas(); renderRutaList(); showT('Orden actualizado');
+    });
+  });
+}
+
+function renumberParadas() {
+  rutaParadas.forEach(function(p, i) { p.id = i+1; });
+}
+
+function saveRutaOrder() {
+  if (!rutaParadas.length) return;
+  var btn = document.getElementById('ruta-save-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action:'newRuta', ruta_id:RUTA_ID, fecha:FECHA, paradas:rutaParadas, vendors:vendorData })
+  }).then(function(r){ return r.json(); })
+  .then(function() {
+    btn.disabled = false; btn.textContent = 'Guardar orden';
+    document.getElementById('ruta-saved').style.display = 'block';
+    setTimeout(function(){ document.getElementById('ruta-saved').style.display='none'; }, 3000);
+    showT('\u2713 Orden guardado');
+  }).catch(function() {
+    btn.disabled = false; btn.textContent = 'Guardar orden';
+    showT('Error al guardar');
+  });
+}
+
+function loadRutaFromConfig() {
+  fetch(SCRIPT_URL + '?action=paradas')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (res.ok && res.paradas && res.paradas.length) {
+        rutaParadas = res.paradas;
+        RUTA_ID = res.ruta_id;
+        FECHA   = res.fecha;
+        renderRutaList();
+      }
+    }).catch(function(){});
+}
+
+function resetTodo() {
+  if (!confirm('\u00bfSeguro? Esto borra TODAS las paradas, misiones, km y progreso del d\u00eda actual. Esta acci\u00f3n no se puede deshacer.')) return;
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'resetRuta', ruta_id: RUTA_ID })
+  }).then(function(r){ return r.json(); })
+  .then(function(res){
+    if (res.ok) {
+      misiones = []; vendorData = {}; PARADAS = []; rutaParadas = []; RUTA_ID = ''; FECHA = '';
+      renderMisiones(); renderRutaList();
+      document.getElementById('archivoOk').style.display = 'none';
+      document.getElementById('uploadZone').classList.remove('loaded');
+      document.getElementById('uploadZone').querySelector('.upload-lbl').textContent = 'Sube el CSV de Shopify';
+      document.getElementById('uploadZone').querySelector('.upload-sub').textContent = 'Arrastra aqui o toca para seleccionar';
+      showT('\u2713 Todo borrado. Listo para empezar de nuevo.');
+    } else { showT('Error al borrar'); }
+  }).catch(function(){ showT('Error de conexion'); });
+}
+
+function loadInitial() {
+  fetch(SCRIPT_URL + '?action=misiones')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      misiones = res.misiones || [];
+      renderMisiones();
+    }).catch(function(){ renderMisiones(); });
+
+  fetch(SCRIPT_URL + '?action=vendors&ruta_id=' + encodeURIComponent(RUTA_ID))
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (res.vendors && Object.keys(res.vendors).length) {
+        vendorData = res.vendors;
+        showArchivoOk('(archivo anterior)');
+        updateVendorSelect();
+      }
+    }).catch(function(){});
+}
+
+
+// ── PEDIDOS ──────────────────────────────────────────────────────────
+function loadPedidos() {
+  document.getElementById('pedidos-loading').style.display = 'block';
+  fetch(SCRIPT_URL + '?action=prodOverrides')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (res.ok && res.overrides) prodOverrides = res.overrides;
+      renderPedidos();
+    }).catch(function(){
+      renderPedidos();
+    });
+}
+
+function getAllOrders() {
+  var orders = [];
+  PARADAS.forEach(function(p) {
+    if(p.tipo === 'punto-retiro') {
+      p.clientes.forEach(function(cl) {
+        orders.push({ key: cl.orderNum, num: cl.orderNum, nombre: cl.custName, punto: p.nombre, productos: cl.productos, tipo: 'retiro' });
+      });
+    } else if(p.tipo === 'entrega') {
+      orders.push({ key: '#'+p.id, num: p.orderNum||'#'+p.id, nombre: p.nombre, punto: p.direccion, productos: p.productos||[], tipo: 'entrega' });
+    }
+  });
+  return orders;
+}
+
+function renderPedidos() {
+  var list    = document.getElementById('pedidos-list');
+  var loading = document.getElementById('pedidos-loading');
+  loading.style.display = 'none';
+  var orders = getAllOrders();
+  if (!orders.length) {
+    list.innerHTML = '<p style="color:#888;font-size:15px">' + (PARADAS.length ? 'Sin pedidos cargados' : 'Carga el CSV primero') + '</p>';
+    return;
+  }
+  list.innerHTML = '';
+  orders.forEach(function(order) {
+    var ov = prodOverrides[order.key] || {deleted:[], qty:{}};
+    if(ov.orderDeleted) {
+      var card = document.createElement('div');
+      card.className = 'ped-card';
+      card.style.opacity = '0.5';
+      card.innerHTML = '<div class="ped-card-header" style="text-decoration:line-through">'
+        + '<span class="ped-card-name">'+order.nombre+'</span>'
+        + '<span class="ped-card-num">'+order.num+' — eliminado</span>'
+        + '<button onclick="restoreOrder(&quot;'+order.key+'&quot;)" style="background:#fff3cd;color:#856404;border:none;border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer;opacity:1">Restaurar</button>'
+        + '</div>';
+      list.appendChild(card);
+      return;
+    }
+    var card = document.createElement('div');
+    card.className = 'ped-card';
+    var tagColor = order.tipo==='retiro' ? 'background:#cdece2;color:#3d5a40' : 'background:#d4edda;color:#1a5e2e';
+    var displayAddr = ov.direccion || order.punto;
+    var addrEditBtn = '<button onclick="editDireccion(&quot;'+order.key+'&quot;)" style="background:#e8f4e8;color:var(--gd);border:none;border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer">&#9998;</button>';
+    var header = '<div class="ped-card-header">'
+      + '<div><span class="ped-card-name">'+order.nombre+'</span>'
+      + '<span class="ped-tag" style="'+tagColor+'">'+order.tipo+'</span></div>'
+      + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+      + '<span class="ped-card-num">'+order.num+' · '+displayAddr+'</span>'
+      + addrEditBtn
+      + '<button class="ped-order-del" onclick="deleteOrder(&quot;'+order.key+'&quot;)" title="Eliminar pedido completo" style="background:#fde8e8;color:#c0392b;border:none;border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer;font-weight:700">&#128465; Eliminar</button>'
+      + '</div>'
+      + '</div>';
+    var prods = '<div>';
+    order.productos.forEach(function(pr, pi) {
+      var isDel = ov.deleted && ov.deleted.indexOf(pi) >= 0;
+      var qty = (ov.qty && ov.qty[pi] !== undefined) ? ov.qty[pi] : pr.qty;
+      prods += '<div class="ped-prod-row'+(isDel?' ped-prod-deleted':'')+'" data-key="'+order.key+'" data-pidx="'+pi+'">'
+        + '<span class="ped-prod-qty">'+qty+'</span>'
+        + '<span class="ped-prod-nom">'+pr.nombre+'</span>'
+        + (isDel
+          ? '<button class="ped-prod-edit" onclick="restoreProd(&quot;'+order.key+'&quot;,'+pi+')" style="background:#fff3cd;color:#856404">Restaurar</button>'
+          : '<button class="ped-prod-edit" onclick="editProdQty(&quot;'+order.key+'&quot;,'+pi+',&quot;'+pr.nombre+'&quot;)">&#9998;</button>'
+            + '<button class="ped-prod-del" onclick="deleteProd(&quot;'+order.key+'&quot;,'+pi+')">&#10005;</button>'
+          )
+        + '</div>';
+    });
+    prods += '</div>';
+    card.innerHTML = header + prods;
+    list.appendChild(card);
+  });
+  document.getElementById('pedidos-save-wrap').style.display = 'block';
+}
+
+function deleteProd(key, pi) {
+  if(!prodOverrides[key]) prodOverrides[key] = {deleted:[], qty:{}};
+  if(prodOverrides[key].deleted.indexOf(pi) < 0) prodOverrides[key].deleted.push(pi);
+  renderPedidos();
+}
+
+function editDireccion(key) {
+  if(!prodOverrides[key]) prodOverrides[key] = {deleted:[], qty:{}};
+  var cur = prodOverrides[key].direccion || '';
+  var orders = getAllOrders();
+  var order = orders.find(function(o){ return o.key === key; });
+  if(!cur && order) cur = order.punto;
+  var label = (order && order.tipo === 'retiro') ? 'Punto de retiro:' : 'Dirección de entrega:';
+  var nv = prompt(label, cur);
+  if(nv === null) return;
+  prodOverrides[key].direccion = nv.trim();
+  renderPedidos();
+  showT('Dirección actualizada');
+}
+
+function restoreOrder(key) {
+  if(prodOverrides[key]) prodOverrides[key].orderDeleted = false;
+  renderPedidos();
+  showT('Pedido restaurado');
+}
+
+function deleteOrder(key) {
+  if(!confirm('\u00bfEliminar pedido completo de "' + key + '"?')) return;
+  if(!prodOverrides[key]) prodOverrides[key] = {deleted:[], qty:{}};
+  // Mark as fully deleted
+  prodOverrides[key].orderDeleted = true;
+  renderPedidos();
+  showT('Pedido eliminado');
+}
+
+function restoreProd(key, pi) {
+  if(!prodOverrides[key]) return;
+  var idx = prodOverrides[key].deleted.indexOf(pi);
+  if(idx >= 0) prodOverrides[key].deleted.splice(idx, 1);
+  renderPedidos();
+}
+
+function editProdQty(key, pi, nombre) {
+  if(!prodOverrides[key]) prodOverrides[key] = {deleted:[], qty:{}};
+  var cur = prodOverrides[key].qty[pi] || '';
+  var nv = prompt('Nueva cantidad para "'+nombre+'":', cur);
+  if(nv === null) return;
+  prodOverrides[key].qty[pi] = nv.trim();
+  renderPedidos();
+}
+
+function applyOverridesToRuta() {
+  var orders = getAllOrders();
+  var customPuntos = {};
+  // Collect all orderKeys that are being moved to a new punto
+  var movedKeys = {};
+
+  orders.forEach(function(order) {
+    var ov = prodOverrides[order.key];
+    if(!ov || !ov.direccion || ov.orderDeleted) return;
+    var newPunto = ov.direccion.trim();
+    if(!customPuntos[newPunto]) customPuntos[newPunto] = [];
+    customPuntos[newPunto].push(order);
+    movedKeys[order.key] = true;
+  });
+
+  if(!Object.keys(customPuntos).length) {
+    showT('Sin puntos nuevos que agregar');
+    return;
+  }
+
+  // 1. Remove the moved orders from their original paradas
+  rutaParadas.forEach(function(p) {
+    if(p.tipo === 'punto-retiro') {
+      p.clientes = p.clientes.filter(function(cl){ return !movedKeys[cl.orderNum]; });
+    } else if(p.tipo === 'entrega') {
+      // entrega key is '#'+p.id
+      if(movedKeys['#'+p.id]) p._hidden = true;
+    }
+  });
+  // Remove emptied punto-retiro paradas (except known fixed ones)
+  // and hidden entregas
+  rutaParadas = rutaParadas.filter(function(p){
+    if(p._hidden) return false;
+    if(p.tipo === 'punto-retiro' && p.clientes.length === 0) return false;
+    return true;
+  });
+
+  // 2. Remove existing custom paradas with same name to avoid duplicates
+  Object.keys(customPuntos).forEach(function(puntoName) {
+    rutaParadas = rutaParadas.filter(function(p){ return p.nombre !== puntoName; });
+  });
+
+  // 3. Add new custom paradas at the beginning
+  Object.keys(customPuntos).reverse().forEach(function(puntoName) {
+    var clientes = customPuntos[puntoName].map(function(o) {
+      return { orderNum: o.key, custName: o.nombre, phone: '', productos: o.productos, pago: {monto:0, metodo:'Ver pedido'} };
+    });
+    rutaParadas.unshift({
+      id: 'custom-' + puntoName.replace(/[^a-z0-9]/gi,'-').toLowerCase(),
+      tipo: 'punto-retiro',
+      nombre: puntoName,
+      direccion: puntoName,
+      mapUrl: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(puntoName + ', Puerto Varas'),
+      telefono: '', notas: '',
+      clientes: clientes
+    });
+  });
+
+  renderRutaList();
+  showT('\u2713 ' + Object.keys(customPuntos).length + ' parada(s) aplicada(s) a la ruta');
+}
+
+function saveProdOverrides() {
+  var btn = document.querySelector('#pedidos-save-wrap button');
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+  fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveProdOverrides', ruta_id: RUTA_ID, overrides: prodOverrides }) })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      btn.textContent = '\u2713 Guardado'; btn.disabled = false;
+      showT('Cambios guardados en la ruta');
+      setTimeout(function(){ btn.textContent = '\uD83D\uDCBE Guardar cambios'; }, 2000);
+      applyOverridesToRuta();
+    }).catch(function(){ btn.textContent = 'Error al guardar'; btn.disabled = false; });
+}
+function showT(m) {
+  var t = document.getElementById('toast'); t.innerHTML = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+
+loadData();
+loadInitial();
+loadVendorAndProductMeta(function() {
+  // re-render productor section if CSV already loaded
+  if (Object.keys(vendorData).length > 0) renderProductorSection();
+});
+</script></body></html>

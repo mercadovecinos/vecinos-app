@@ -14,7 +14,7 @@
 body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);min-height:100vh;font-size:16px}
 
 /* HEADER */
-.hdr{background:var(--gd);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 16px rgba(40,70,42,.3);position:sticky;top:0;z-index:100}
+.hdr{background:var(--gd);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 16px rgba(40,70,42,.3);position:sticky;top:0;z-index:100;position:relative}
 .logo img{height:42px;object-fit:contain}
 .badge-sync{background:rgba(255,255,255,.18);color:white;padding:9px 18px;border-radius:22px;font-size:14px;cursor:pointer;font-weight:700;border:none;font-family:'Readex Pro',sans-serif}
 
@@ -116,6 +116,7 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);mi
 
 <div class="hdr">
   <div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_2.png?v=1772739099" alt="Vecinos"></div>
+  <span style="position:absolute;left:50%;transform:translateX(-50%);color:white;font-weight:800;font-size:15px;letter-spacing:.3px">Picker App</span>
   <button class="badge-sync" onclick="loadAll()">&#8635; Actualizar</button>
 </div>
 
@@ -324,6 +325,7 @@ function renderResumen() {
   ESTADOS_ORDER.forEach(function(e){ estadoCounts[e] = 0; });
   var vendorsVienen = [];
   Object.keys(vendorMeta).forEach(function(v) {
+    if(!vendorData[v]) return; // ignorar vendors que no están en el CSV de esta semana
     var e = vendorMeta[v];
     if(!e || e === '—') return;
     if(estadoCounts[e] !== undefined) estadoCounts[e]++;

@@ -341,7 +341,12 @@ function getVendorMetaSheet() {
 
 function saveVendorMeta(data) {
   // data.meta = { "Borlone": "Vienen a dejar", ... }
+  // data.clear = true → limpia la sheet antes de guardar (usar al subir CSV nuevo)
   var sh  = getVendorMetaSheet();
+  if (data.clear) {
+    var n = sh.getLastRow();
+    if (n > 1) sh.deleteRows(2, n - 1);
+  }
   var now = new Date().toISOString();
   Object.keys(data.meta).forEach(function(vendor) {
     var estado = data.meta[vendor];

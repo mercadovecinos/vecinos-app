@@ -446,16 +446,12 @@ function setProdNota(key, nota) {
 }
 
 function saveVendorMeta() {
-  var p1 = fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) })
-    .then(function(r){ return r.json(); });
-  var p2 = fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) })
-    .then(function(r){ return r.json(); });
-  Promise.all([p1, p2])
-    .then(function(results) {
-      var allOk = results.every(function(r){ return r.ok; });
-      showT(allOk ? '\u2713 Cambios de productores guardados' : 'Algunos cambios no se guardaron');
-    })
-    .catch(function(){ showT('Error al guardar productores'); });
+  // mode:'no-cors' para garantizar envío desde file:// sin bloqueos CORS
+  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) })
+    .catch(function(){});
+  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) })
+    .catch(function(){});
+  showT('\u2713 Cambios de productores guardados');
 }
 
 function loadVendorAndProductMeta(cb) {

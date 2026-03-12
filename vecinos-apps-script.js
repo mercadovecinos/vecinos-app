@@ -334,19 +334,20 @@ function getVendorMetaSheet() {
 }
 
 function saveVendorMeta(data) {
-  // data.meta = { "Borlone": "Vienen a dejar", ... }
-  // Siempre hace clear-and-rewrite atómico (no upsert) para evitar duplicados y bugs
+  // Siempre hace clear-and-rewrite atómico (no upsert) para evitar bugs
   var sh  = getVendorMetaSheet();
   var n = sh.getLastRow();
   if (n > 1) sh.deleteRows(2, n - 1);
   var now = new Date().toISOString();
-  var rows = Object.keys(data.meta).map(function(vendor) {
-    return [vendor, data.meta[vendor], now];
+  var meta = data.meta || {};
+  meta['__v__'] = 'atomic3'; // marcador para verificar que este código corre
+  var rows = Object.keys(meta).map(function(vendor) {
+    return [vendor, meta[vendor], now];
   });
   if (rows.length > 0) {
     sh.getRange(2, 1, rows.length, 3).setValues(rows);
   }
-  SpreadsheetApp.flush(); // forzar commit inmediato
+  SpreadsheetApp.flush();
   return {ok:true};
 }
 

@@ -148,10 +148,11 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);mi
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykqQLxkNidUZnmcXADFvUmuuAfvs5rk8eebEL9OG7uh4-6eXGG1e0nc_1oESEG4NvT/exec';
 
 var PARADAS = [];
-var vendorMeta = {};   // {vendor: estado}
-var productMeta = {};  // {"NxProdName||vendor": {c,r,nota}}
-var vendorData = {};   // {vendor: ["2x Producto", ...]}
+var vendorMeta = {};     // {vendor: estado}
+var productMeta = {};    // {"NxProdName||vendor": {c,r,nota}}
+var vendorData = {};     // {vendor: ["2x Producto", ...]}
 var pickerProgress = {}; // {orderKey: [checkedIndices]}
+var prodOverrides = {};  // {orderKey: {deleted:[idx], qty:{idx:qty}, orderDeleted:bool, direccion:str}}
 var RUTA_ID = '';
 var currentFilter = 'todos';
 
@@ -216,7 +217,7 @@ function loadAll() {
   var built = false;
   function check() {
     done++;
-    if(done >= 5 && !built) { built = true; buildAll(); showT('✓ Actualizado'); }
+    if(done >= 6 && !built) { built = true; buildAll(); showT('✓ Actualizado'); }
   }
   setTimeout(function() {
     if(!built) { built = true; buildAll(); showT('✓ Listo'); }
@@ -242,6 +243,10 @@ function loadAll() {
     if(res && res.progress) pickerProgress = res.progress;
     check();
   });
+  gasGet('prodOverrides', function(res) {
+    if(res && res.ok && res.overrides) prodOverrides = res.overrides;
+    check();
+  });
 }
 
 function buildAll() {
@@ -256,21 +261,28 @@ function getAllOrders() {
   PARADAS.forEach(function(p) {
     if(p.tipo === 'punto-retiro') {
       p.clientes.forEach(function(cl) {
-        orders.push({ key: cl.orderNum, nombre: cl.custName, lugar: p.nombre, productos: cl.productos || [], tipo: 'retiro' });
+        var ov = prodOverrides[cl.orderNum] || null;
+        if(ov && ov.orderDeleted) return;
+        orders.push({ key: cl.orderNum, displayNum: cl.orderNum, nombre: cl.custName, lugar: p.nombre, productos: cl.productos || [], ov: ov, tipo: 'retiro' });
       });
     } else if(p.tipo === 'entrega') {
-      orders.push({ key: '#'+p.id, nombre: p.nombre, lugar: p.direccion, productos: p.productos || [], tipo: 'entrega' });
+      var key = '#'+p.id;
+      var ov = prodOverrides[key] || null;
+      if(ov && ov.orderDeleted) return;
+      orders.push({ key: key, displayNum: p.orderNum || key, nombre: p.nombre, lugar: ov && ov.direccion ? ov.direccion : p.direccion, productos: p.productos || [], ov: ov, tipo: 'entrega' });
     }
   });
   return orders;
 }
 
-function getOrderEstado(orderKey, productos) {
+function getOrderEstado(orderKey, productos, ov) {
   var checked = pickerProgress[orderKey] || [];
-  var total = productos.length;
+  var deleted = (ov && ov.deleted) ? ov.deleted : [];
+  var total = productos.filter(function(_, i){ return deleted.indexOf(i) < 0; }).length;
   if(total === 0) return 'preparado';
-  if(checked.length === 0) return 'pendiente';
-  if(checked.length >= total) return 'preparado';
+  var checkedVisible = checked.filter(function(i){ return deleted.indexOf(i) < 0; }).length;
+  if(checkedVisible === 0) return 'pendiente';
+  if(checkedVisible >= total) return 'preparado';
   return 'incompleto';
 }
 
@@ -313,7 +325,7 @@ function renderResumen() {
   var total = orders.length;
   var preparados = 0, pendientes = 0, incompletos = 0;
   orders.forEach(function(o) {
-    var e = getOrderEstado(o.key, o.productos);
+    var e = getOrderEstado(o.key, o.productos, o.ov);
     if(e === 'preparado') preparados++;
     else if(e === 'incompleto') incompletos++;
     else pendientes++;
@@ -384,7 +396,7 @@ function setFilter(f, btn) {
 function renderPedidos() {
   var orders = getAllOrders();
   if(currentFilter !== 'todos') {
-    orders = orders.filter(function(o){ return getOrderEstado(o.key, o.productos) === currentFilter; });
+    orders = orders.filter(function(o){ return getOrderEstado(o.key, o.productos, o.ov) === currentFilter; });
   }
 
   if(!orders.length) {
@@ -395,25 +407,29 @@ function renderPedidos() {
   var html = '';
   orders.forEach(function(order) {
     var checked = pickerProgress[order.key] || [];
-    var estado = getOrderEstado(order.key, order.productos);
+    var deleted = (order.ov && order.ov.deleted) ? order.ov.deleted : [];
+    var estado = getOrderEstado(order.key, order.productos, order.ov);
     var estadoLabel = getEstadoLabel(estado);
     var estadoClass = getEstadoClass(estado);
 
     html += '<div class="pedido-card" id="order-' + order.key.replace('#','') + '">';
     html += '<div class="pedido-header">';
-    html += '<div><div class="pedido-num">' + order.key + '</div><div class="pedido-nombre">' + order.nombre + '</div><div class="pedido-lugar">📍 ' + order.lugar + '</div></div>';
+    html += '<div><div class="pedido-num">' + order.displayNum + '</div><div class="pedido-nombre">' + order.nombre + '</div><div class="pedido-lugar">📍 ' + order.lugar + '</div></div>';
     html += '<div class="pedido-estado-badge ' + estadoClass + '">' + estadoLabel + '</div>';
     html += '</div>';
 
-    if(order.productos.length > 0) {
+    var prodsVisibles = order.productos.filter(function(_, i){ return deleted.indexOf(i) < 0; });
+    if(prodsVisibles.length > 0) {
       html += '<div class="pedido-prods">';
       order.productos.forEach(function(prod, idx) {
+        if(deleted.indexOf(idx) >= 0) return; // saltar eliminados, mantener idx original
         var isChecked = checked.indexOf(idx) >= 0;
+        var qty = (order.ov && order.ov.qty && order.ov.qty[idx]) ? order.ov.qty[idx] : (prod.qty || '');
         var tags = getProdTags(prod);
         html += '<div class="prod-item">';
         html += '<div class="prod-check' + (isChecked?' checked':'') + '" onclick="toggleCheck(\'' + order.key + '\',' + idx + ',this)"></div>';
         html += '<div class="prod-info">';
-        html += '<div class="prod-nombre' + (isChecked?' checked':'') + '">' + (prod.qty||'') + ' ' + (prod.nombre||prod) + '</div>';
+        html += '<div class="prod-nombre' + (isChecked?' checked':'') + '">' + qty + ' ' + (prod.nombre||prod) + '</div>';
         if(prod.vendor) html += '<div class="prod-vendor">' + prod.vendor + '</div>';
         if(tags) html += '<div class="prod-tags">' + tags + '</div>';
         html += '</div>';
@@ -446,7 +462,7 @@ function toggleCheck(orderKey, idx, el) {
     var card = document.getElementById('order-' + orderKey.replace('#',''));
     if(card) {
       var badge = card.querySelector('.pedido-estado-badge');
-      var estado = getOrderEstado(orderKey, order.productos);
+      var estado = getOrderEstado(orderKey, order.productos, order.ov);
       badge.className = 'pedido-estado-badge ' + getEstadoClass(estado);
       badge.textContent = getEstadoLabel(estado);
     }

@@ -469,6 +469,13 @@ function saveVendorMeta() {
       .then(function(res){
         console.log('[saveVendorMeta] verificación GAS:', JSON.stringify(res && res.meta));
         if (res && res.meta) {
+          // Verificar si el código GAS es el nuevo (atomic) o el viejo (upsert)
+          if (!res.meta['__v__']) {
+            setSaveStatus('\u26a0 Código GAS desactualizado – redespliega', '#bd4a52');
+            showT('\u26a0 Código GAS desactualizado');
+            return;
+          }
+          // Ignorar la clave marcadora en la comparación
           var changed = Object.keys(vendorMeta).filter(function(v){ return vendorMeta[v] && vendorMeta[v] !== '—'; });
           var mismatches = changed.filter(function(v){ return res.meta[v] !== vendorMeta[v]; });
           var now = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});

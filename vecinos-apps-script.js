@@ -155,12 +155,6 @@ function getLatestConfig() {
 
 function getActiveRutaId() {
   var config = getLatestConfig();
-  return config ? config.ruta_id : RUTA_ID;
-}
-
-
-function getActiveRutaId() {
-  var config = getLatestConfig();
   return config ? config.ruta_id : '';
 }
 

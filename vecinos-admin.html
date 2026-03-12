@@ -454,7 +454,24 @@ function saveVendorMeta() {
   var count = 0, allOk = true;
   function onDone(ok) {
     if (!ok) allOk = false;
-    if (++count === 2) showT(allOk ? '\u2713 Productores guardados' : '\u26a0 Error al guardar \u2013 reintenta');
+    if (++count === 2) {
+      if (!allOk) { showT('\u26a0 Error al guardar \u2013 reintenta'); return; }
+      // Verificar que GAS recibió los datos correctamente
+      fetch(SCRIPT_URL + '?action=vendorMeta&t=' + Date.now())
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+          if (res && res.meta) {
+            var mismatches = Object.keys(vendorMeta).filter(function(v){ return res.meta[v] !== vendorMeta[v]; });
+            if (mismatches.length === 0) {
+              showT('\u2713 Guardado y verificado');
+            } else {
+              showT('\u26a0 GAS no guardó: ' + mismatches.slice(0,2).join(', '));
+            }
+          } else {
+            showT('\u26a0 Guardado (GAS no respondió)');
+          }
+        }).catch(function(){ showT('\u2713 Guardado (sin verificar)'); });
+    }
   }
   fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) })
     .then(function(r){ return r.json(); })
@@ -659,10 +676,10 @@ function loadData() {
 
 function loadProgress() {
   document.getElementById('badge').textContent = 'Actualizando...';
-  fetch(SCRIPT_URL + '?ruta_id=' + encodeURIComponent(RUTA_ID))
+  fetch(SCRIPT_URL + '?action=stops&ruta_id=' + encodeURIComponent(RUTA_ID))
     .then(function(r){ return r.json(); })
     .then(function(res) {
-      var data = res.data || {}, done = 0, html = '';
+      var data = res.stops || {}, done = 0, html = '';
       PARADAS.forEach(function(p, i) {
         var est = data[String(p.id)], isDone = est && est.estado === 'completado';
         if (isDone) done++;
@@ -694,16 +711,28 @@ function loadPickerStatus() {
       PARADAS.forEach(function(p) {
         if(p.tipo === 'punto-retiro') {
           (p.clientes || []).forEach(function(cl) {
-            orders.push({ key: cl.orderNum, total: (cl.productos || []).length });
+            var ov = prodOverrides[cl.orderNum] || null;
+            if(ov && ov.orderDeleted) return;
+            var deleted = (ov && ov.deleted) ? ov.deleted : [];
+            var total = (cl.productos || []).length - deleted.length;
+            orders.push({ key: cl.orderNum, total: total });
           });
         } else if(p.tipo === 'entrega') {
-          orders.push({ key: '#'+p.id, total: (p.productos || []).length });
+          var key = '#'+p.id;
+          var ov = prodOverrides[key] || null;
+          if(ov && ov.orderDeleted) return;
+          var deleted = (ov && ov.deleted) ? ov.deleted : [];
+          var total = (p.productos || []).length - deleted.length;
+          orders.push({ key: key, total: total });
         }
       });
       var preparados = 0, incompletos = 0, pendientes = 0;
       orders.forEach(function(o) {
-        var checked = (progress[o.key] || []).length;
-        if(checked >= o.total && o.total > 0) preparados++;
+        var checkedAll = progress[o.key] || [];
+        var ov = prodOverrides[o.key] || null;
+        var deleted = (ov && ov.deleted) ? ov.deleted : [];
+        var checked = checkedAll.filter(function(i){ return deleted.indexOf(i) < 0; }).length;
+        if(o.total <= 0 || checked >= o.total) preparados++;
         else if(checked > 0) incompletos++;
         else pendientes++;
       });

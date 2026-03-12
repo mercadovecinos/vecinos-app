@@ -417,6 +417,7 @@ function toggleVendorSection(header) {
   else { body.style.display = 'none'; toggle.textContent = '▸'; }
 }
 
+var _saveVMTimer = null;
 function setVendorEstado(vendor, estado) {
   vendorMeta[vendor] = estado;
   // Update badge color immediately
@@ -427,6 +428,9 @@ function setVendorEstado(vendor, estado) {
     badge.style.background = color + '20'; badge.style.color = color; badge.style.borderColor = color + '40';
     badge.textContent = estado;
   }
+  // Auto-save after 1.5s of inactivity
+  clearTimeout(_saveVMTimer);
+  _saveVMTimer = setTimeout(saveVendorMeta, 1500);
 }
 
 function toggleProdTag(key, tag) {
@@ -446,12 +450,27 @@ function setProdNota(key, nota) {
 }
 
 function saveVendorMeta() {
-  // mode:'no-cors' para garantizar envío desde file:// sin bloqueos CORS
-  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) })
-    .catch(function(){});
-  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) })
-    .catch(function(){});
-  showT('\u2713 Cambios de productores guardados');
+  showT('Guardando...');
+  var count = 0, allOk = true;
+  function onDone(ok) {
+    if (!ok) allOk = false;
+    if (++count === 2) showT(allOk ? '\u2713 Productores guardados' : '\u26a0 Error al guardar \u2013 reintenta');
+  }
+  fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) })
+    .then(function(r){ return r.json(); })
+    .then(function(res){ onDone(!!(res && res.ok)); })
+    .catch(function(){
+      // Fallback no-cors si CORS falla desde file://
+      fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) }).catch(function(){});
+      onDone(false);
+    });
+  fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) })
+    .then(function(r){ return r.json(); })
+    .then(function(res){ onDone(!!(res && res.ok)); })
+    .catch(function(){
+      fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) }).catch(function(){});
+      onDone(false);
+    });
 }
 
 function loadVendorAndProductMeta(cb) {

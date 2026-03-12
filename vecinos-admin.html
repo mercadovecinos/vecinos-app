@@ -458,57 +458,40 @@ function setProdNota(key, nota) {
 function saveVendorMeta() {
   setSaveStatus('⏳ Guardando...', '#f4a259');
   showT('Guardando...');
-  var count = 0, allOk = true;
-  function onDone(ok) {
-    if (!ok) allOk = false;
-    if (++count === 2) {
-      if (!allOk) {
-        setSaveStatus('⚠ Error al guardar – reintenta', '#bd4a52');
-        showT('\u26a0 Error al guardar \u2013 reintenta');
-        return;
-      }
-      // Verificar que GAS recibió los datos correctamente (delay 1.5s para propagación)
-      setTimeout(function() {
-      fetch(SCRIPT_URL + '?action=vendorMeta&t=' + Date.now())
-        .then(function(r){ return r.json(); })
-        .then(function(res){
-          if (res && res.meta) {
-            var changed = Object.keys(vendorMeta).filter(function(v){ return vendorMeta[v] && vendorMeta[v] !== '—'; });
-            var mismatches = changed.filter(function(v){ return res.meta[v] !== vendorMeta[v]; });
-            var now = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-            if (mismatches.length === 0) {
-              setSaveStatus('\u2713 Guardado y verificado · ' + now, '#5a8e7d');
-              showT('\u2713 Guardado y verificado');
-            } else {
-              setSaveStatus('\u26a0 GAS no guardó: ' + mismatches.slice(0,2).join(', '), '#bd4a52');
-              showT('\u26a0 GAS no guard\u00f3: ' + mismatches.slice(0,2).join(', '));
-            }
+  // Usar no-cors (siempre funciona desde file://, igual que el repartidor)
+  console.log('[saveVendorMeta] enviando vendorMeta:', JSON.stringify(vendorMeta));
+  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) }).catch(function(){});
+  fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) }).catch(function(){});
+  // Verificar después de 3s que GAS guardó correctamente
+  setTimeout(function() {
+    fetch(SCRIPT_URL + '?action=vendorMeta&t=' + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        console.log('[saveVendorMeta] verificación GAS:', JSON.stringify(res && res.meta));
+        if (res && res.meta) {
+          var changed = Object.keys(vendorMeta).filter(function(v){ return vendorMeta[v] && vendorMeta[v] !== '—'; });
+          var mismatches = changed.filter(function(v){ return res.meta[v] !== vendorMeta[v]; });
+          var now = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+          if (mismatches.length === 0) {
+            setSaveStatus('\u2713 Guardado y verificado · ' + now, '#5a8e7d');
+            showT('\u2713 Guardado y verificado');
           } else {
-            setSaveStatus('\u26a0 GAS no respondió – estado desconocido', '#bd4a52');
-            showT('\u26a0 Guardado (GAS no respondi\u00f3)');
+            var detail = mismatches.slice(0,1).map(function(v){
+              var short = v.length > 20 ? v.slice(-20) : v;
+              return short + ': GAS="' + (res.meta[v]||'(vacío)') + '"';
+            }).join(', ');
+            setSaveStatus('\u26a0 No guardó · ' + detail, '#bd4a52');
+            showT('\u26a0 GAS no guard\u00f3: ' + mismatches.slice(0,2).join(', '));
           }
-        }).catch(function(){
-          setSaveStatus('\u26a0 Sin verificar – comprueba el picker', '#f4a259');
-          showT('\u2713 Guardado (sin verificar)');
-        });
-      }, 1500); // delay 1.5s para que GAS propague el write antes del GET
-    }
-  }
-  fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) })
-    .then(function(r){ return r.json(); })
-    .then(function(res){ onDone(!!(res && res.ok)); })
-    .catch(function(){
-      // Fallback no-cors si CORS falla desde file://
-      fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) }).catch(function(){});
-      onDone(false);
-    });
-  fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) })
-    .then(function(r){ return r.json(); })
-    .then(function(res){ onDone(!!(res && res.ok)); })
-    .catch(function(){
-      fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) }).catch(function(){});
-      onDone(false);
-    });
+        } else {
+          setSaveStatus('\u26a0 GAS no respondió – reintenta', '#bd4a52');
+          showT('\u26a0 Guardado (GAS no respondi\u00f3)');
+        }
+      }).catch(function(){
+        setSaveStatus('\u26a0 Sin verificar – recarga el picker', '#f4a259');
+        showT('\u2713 Guardado (sin verificar)');
+      });
+  }, 3000);
 }
 
 function loadVendorAndProductMeta(cb) {

@@ -346,6 +346,7 @@ function saveVendorMeta(data) {
   if (rows.length > 0) {
     sh.getRange(2, 1, rows.length, 3).setValues(rows);
   }
+  SpreadsheetApp.flush(); // forzar commit inmediato
   return {ok:true};
 }
 

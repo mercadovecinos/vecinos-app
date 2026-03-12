@@ -4,7 +4,7 @@
 html{-webkit-text-size-adjust:100%}
 html,body{width:100%;overflow-x:hidden}
 body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);padding-bottom:40px;font-size:16px}
-.hdr{background:var(--gd);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 16px rgba(40,70,42,.3);position:sticky;top:0;z-index:100;position:relative}
+.hdr{background:var(--gd);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 16px rgba(40,70,42,.3);position:sticky;top:0;z-index:100}
 .logo img{height:42px;object-fit:contain}
 .badge{background:rgba(255,255,255,.18);color:white;padding:9px 18px;border-radius:22px;font-size:14px;cursor:pointer;font-weight:700;border:none;font-family:'Readex Pro',sans-serif}
 .tabs{display:flex;background:white;border-bottom:2px solid var(--gp);position:sticky;top:74px;z-index:99;overflow-x:auto}
@@ -458,24 +458,15 @@ function setProdNota(key, nota) {
 function saveVendorMeta() {
   setSaveStatus('⏳ Guardando...', '#f4a259');
   showT('Guardando...');
-  // Usar no-cors (siempre funciona desde file://, igual que el repartidor)
-  console.log('[saveVendorMeta] enviando vendorMeta:', JSON.stringify(vendorMeta));
+  // no-cors: siempre funciona desde file://, response es opaca pero el POST llega
   fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) }).catch(function(){});
   fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveProductMeta', meta: productMeta }) }).catch(function(){});
-  // Verificar después de 3s que GAS guardó correctamente
+  // GET de verificación después de 3s para confirmar que GAS persistió los datos
   setTimeout(function() {
     fetch(SCRIPT_URL + '?action=vendorMeta&t=' + Date.now())
       .then(function(r){ return r.json(); })
       .then(function(res){
-        console.log('[saveVendorMeta] verificación GAS:', JSON.stringify(res && res.meta));
         if (res && res.meta) {
-          // Verificar si el código GAS es el nuevo (atomic) o el viejo (upsert)
-          if (!res.meta['__v__']) {
-            setSaveStatus('\u26a0 Código GAS desactualizado – redespliega', '#bd4a52');
-            showT('\u26a0 Código GAS desactualizado');
-            return;
-          }
-          // Ignorar la clave marcadora en la comparación
           var changed = Object.keys(vendorMeta).filter(function(v){ return vendorMeta[v] && vendorMeta[v] !== '—'; });
           var mismatches = changed.filter(function(v){ return res.meta[v] !== vendorMeta[v]; });
           var now = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
@@ -483,16 +474,12 @@ function saveVendorMeta() {
             setSaveStatus('\u2713 Guardado y verificado · ' + now, '#5a8e7d');
             showT('\u2713 Guardado y verificado');
           } else {
-            var detail = mismatches.slice(0,1).map(function(v){
-              var short = v.length > 20 ? v.slice(-20) : v;
-              return short + ': GAS="' + (res.meta[v]||'(vacío)') + '"';
-            }).join(', ');
-            setSaveStatus('\u26a0 No guardó · ' + detail, '#bd4a52');
+            setSaveStatus('\u26a0 No guardó: ' + mismatches.slice(0,2).join(', '), '#bd4a52');
             showT('\u26a0 GAS no guard\u00f3: ' + mismatches.slice(0,2).join(', '));
           }
         } else {
           setSaveStatus('\u26a0 GAS no respondió – reintenta', '#bd4a52');
-          showT('\u26a0 Guardado (GAS no respondi\u00f3)');
+          showT('\u26a0 GAS no respondi\u00f3');
         }
       }).catch(function(){
         setSaveStatus('\u26a0 Sin verificar – recarga el picker', '#f4a259');
@@ -806,7 +793,6 @@ function loadKmStatus() {
 document.getElementById('badge').addEventListener('click', loadProgress);
 setInterval(loadProgress, 60000);
 
-// Load existing misiones and vendor data
 // ── RUTA REORDER ─────────────────────────────────────────────────────
 var rutaParadas = []; // current ordered paradas
 var dragSrc = null;

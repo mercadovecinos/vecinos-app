@@ -407,7 +407,8 @@ function renderProductorSection() {
     html += '</div>';
   });
   var saveBtn = '<button class="vm-save-btn" style="width:100%;margin-bottom:16px" onclick="saveVendorMeta()">&#128190; Guardar cambios de productores</button>';
-  ok.querySelector('.vendor-preview').innerHTML = saveBtn + html + saveBtn;
+  var saveStatus = '<div id="vm-save-status" style="text-align:center;font-size:13px;font-weight:700;color:#aaa;padding:6px 0 12px;min-height:24px"></div>';
+  ok.querySelector('.vendor-preview').innerHTML = saveBtn + saveStatus + html + saveBtn;
 }
 
 function toggleVendorSection(header) {
@@ -418,6 +419,10 @@ function toggleVendorSection(header) {
 }
 
 var _saveVMTimer = null;
+function setSaveStatus(msg, color) {
+  var el = document.getElementById('vm-save-status');
+  if (el) { el.textContent = msg; el.style.color = color || '#aaa'; }
+}
 function setVendorEstado(vendor, estado) {
   vendorMeta[vendor] = estado;
   // Update badge color immediately
@@ -428,6 +433,7 @@ function setVendorEstado(vendor, estado) {
     badge.style.background = color + '20'; badge.style.color = color; badge.style.borderColor = color + '40';
     badge.textContent = estado;
   }
+  setSaveStatus('⏳ Guardando en 1.5s...', '#f4a259');
   // Auto-save after 1.5s of inactivity
   clearTimeout(_saveVMTimer);
   _saveVMTimer = setTimeout(saveVendorMeta, 1500);
@@ -450,27 +456,40 @@ function setProdNota(key, nota) {
 }
 
 function saveVendorMeta() {
+  setSaveStatus('⏳ Guardando...', '#f4a259');
   showT('Guardando...');
   var count = 0, allOk = true;
   function onDone(ok) {
     if (!ok) allOk = false;
     if (++count === 2) {
-      if (!allOk) { showT('\u26a0 Error al guardar \u2013 reintenta'); return; }
+      if (!allOk) {
+        setSaveStatus('⚠ Error al guardar – reintenta', '#bd4a52');
+        showT('\u26a0 Error al guardar \u2013 reintenta');
+        return;
+      }
       // Verificar que GAS recibió los datos correctamente
       fetch(SCRIPT_URL + '?action=vendorMeta&t=' + Date.now())
         .then(function(r){ return r.json(); })
         .then(function(res){
           if (res && res.meta) {
-            var mismatches = Object.keys(vendorMeta).filter(function(v){ return res.meta[v] !== vendorMeta[v]; });
+            var changed = Object.keys(vendorMeta).filter(function(v){ return vendorMeta[v] && vendorMeta[v] !== '—'; });
+            var mismatches = changed.filter(function(v){ return res.meta[v] !== vendorMeta[v]; });
+            var now = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
             if (mismatches.length === 0) {
+              setSaveStatus('\u2713 Guardado y verificado · ' + now, '#5a8e7d');
               showT('\u2713 Guardado y verificado');
             } else {
-              showT('\u26a0 GAS no guardó: ' + mismatches.slice(0,2).join(', '));
+              setSaveStatus('\u26a0 GAS no guardó: ' + mismatches.slice(0,2).join(', '), '#bd4a52');
+              showT('\u26a0 GAS no guard\u00f3: ' + mismatches.slice(0,2).join(', '));
             }
           } else {
-            showT('\u26a0 Guardado (GAS no respondió)');
+            setSaveStatus('\u26a0 GAS no respondió – estado desconocido', '#bd4a52');
+            showT('\u26a0 Guardado (GAS no respondi\u00f3)');
           }
-        }).catch(function(){ showT('\u2713 Guardado (sin verificar)'); });
+        }).catch(function(){
+          setSaveStatus('\u26a0 Sin verificar – comprueba el picker', '#f4a259');
+          showT('\u2713 Guardado (sin verificar)');
+        });
     }
   }
   fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) })
@@ -1188,7 +1207,7 @@ function saveProdOverrides() {
 }
 function showT(m) {
   var t = document.getElementById('toast'); t.innerHTML = m; t.classList.add('show');
-  setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  setTimeout(function(){ t.classList.remove('show'); }, 4500);
 }
 
 loadData();

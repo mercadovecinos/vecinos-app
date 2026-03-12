@@ -222,9 +222,10 @@ function loadAll() {
     done++;
     if(done >= 6 && !built) { built = true; buildAll(); showT('✓ Actualizado'); }
   }
+  // Safety timeout: si algún request queda colgado, renderizar con lo que haya
   setTimeout(function() {
     if(!built) { built = true; buildAll(); showT('✓ Listo'); }
-  }, 12000);
+  }, 12000); // 12s = margen holgado sobre el timeout interno de gasGet (5s fetch + 10s JSONP)
 
   gasGet('paradas', function(res) {
     if(res && res.ok) { PARADAS = res.paradas || []; RUTA_ID = res.ruta_id || ''; }

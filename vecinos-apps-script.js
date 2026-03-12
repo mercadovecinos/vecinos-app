@@ -335,25 +335,17 @@ function getVendorMetaSheet() {
 
 function saveVendorMeta(data) {
   // data.meta = { "Borlone": "Vienen a dejar", ... }
-  // data.clear = true → limpia la sheet antes de guardar (usar al subir CSV nuevo)
+  // Siempre hace clear-and-rewrite atómico (no upsert) para evitar duplicados y bugs
   var sh  = getVendorMetaSheet();
-  if (data.clear) {
-    var n = sh.getLastRow();
-    if (n > 1) sh.deleteRows(2, n - 1);
-  }
+  var n = sh.getLastRow();
+  if (n > 1) sh.deleteRows(2, n - 1);
   var now = new Date().toISOString();
-  Object.keys(data.meta).forEach(function(vendor) {
-    var estado = data.meta[vendor];
-    var rows   = sh.getDataRange().getValues(); // reload each time to prevent duplicates
-    var found  = false;
-    for (var i = 1; i < rows.length; i++) {
-      if (rows[i][0] === vendor) {
-        sh.getRange(i+1, 2, 1, 2).setValues([[estado, now]]);
-        found = true; break;
-      }
-    }
-    if (!found) sh.appendRow([vendor, estado, now]);
+  var rows = Object.keys(data.meta).map(function(vendor) {
+    return [vendor, data.meta[vendor], now];
   });
+  if (rows.length > 0) {
+    sh.getRange(2, 1, rows.length, 3).setValues(rows);
+  }
   return {ok:true};
 }
 

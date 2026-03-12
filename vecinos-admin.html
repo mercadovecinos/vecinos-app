@@ -467,7 +467,8 @@ function saveVendorMeta() {
         showT('\u26a0 Error al guardar \u2013 reintenta');
         return;
       }
-      // Verificar que GAS recibió los datos correctamente
+      // Verificar que GAS recibió los datos correctamente (delay 1.5s para propagación)
+      setTimeout(function() {
       fetch(SCRIPT_URL + '?action=vendorMeta&t=' + Date.now())
         .then(function(r){ return r.json(); })
         .then(function(res){
@@ -490,6 +491,7 @@ function saveVendorMeta() {
           setSaveStatus('\u26a0 Sin verificar – comprueba el picker', '#f4a259');
           showT('\u2713 Guardado (sin verificar)');
         });
+      }, 1500); // delay 1.5s para que GAS propague el write antes del GET
     }
   }
   fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta }) })

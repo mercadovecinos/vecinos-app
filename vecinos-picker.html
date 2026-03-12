@@ -117,7 +117,10 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);mi
 <div class="hdr">
   <div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_2.png?v=1772739099" alt="Vecinos"></div>
   <span style="position:absolute;left:50%;transform:translateX(-50%);color:white;font-weight:800;font-size:15px;letter-spacing:.3px">Picker App</span>
-  <button class="badge-sync" onclick="loadAll()">&#8635; Actualizar</button>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+    <button class="badge-sync" onclick="loadAll()">&#8635; Actualizar</button>
+    <span id="last-updated" style="font-size:10px;color:rgba(255,255,255,.55);font-weight:600"></span>
+  </div>
 </div>
 
 <div class="tabs">
@@ -253,6 +256,12 @@ function buildAll() {
   renderResumen();
   renderPedidos();
   renderProveedores();
+  // Timestamp
+  var now = new Date();
+  var hh = String(now.getHours()).padStart(2,'0');
+  var mm = String(now.getMinutes()).padStart(2,'0');
+  var el = document.getElementById('last-updated');
+  if (el) el.textContent = 'actualizado ' + hh + ':' + mm;
 }
 
 // ── HELPERS ───────────────────────────────────────────

@@ -498,8 +498,61 @@ function updateResumenNumbers() {
 }
 
 // ── PRODUCTORES ───────────────────────────────────────
+
+// Devuelve true si al menos un pedido activo aún tiene este producto del vendor
+function isProdActiveForVendor(nombre, vendor) {
+  var found = false;
+  PARADAS.forEach(function(p) {
+    if (found) return;
+    var ordersList = [];
+    if (p.tipo === 'punto-retiro') {
+      (p.clientes || []).forEach(function(cl) { ordersList.push({key: cl.orderNum, productos: cl.productos || []}); });
+    } else if (p.tipo === 'entrega') {
+      ordersList.push({key: '#'+p.id, productos: p.productos || []});
+    }
+    ordersList.forEach(function(o) {
+      if (found) return;
+      var ov = prodOverrides[o.key] || null;
+      if (ov && ov.orderDeleted) return;
+      var deleted = (ov && ov.deleted) ? ov.deleted : [];
+      (o.productos || []).forEach(function(prod, idx) {
+        if (found) return;
+        if (deleted.indexOf(idx) >= 0) return;
+        var prodVendor = prod.vendor || '';
+        if (vendor && prodVendor && prodVendor !== vendor) return;
+        var pNom = prod.nombre || '';
+        // Comparar ignorando el prefijo de cantidad (ej: "2x Leche" → "Leche")
+        var stripped = nombre.replace(/^\d+x\s+/i, '').trim();
+        if (pNom === nombre || pNom === stripped) found = true;
+      });
+    });
+  });
+  return found;
+}
+
+// Construye lista de vendors: union de vendorData + vendors en PARADAS
+function getAllVendors() {
+  var vendors = {};
+  Object.keys(vendorData).forEach(function(v) { vendors[v] = true; });
+  PARADAS.forEach(function(p) {
+    var ordersList = [];
+    if (p.tipo === 'punto-retiro') {
+      (p.clientes || []).forEach(function(cl) { ordersList.push(cl.productos || []); });
+    } else if (p.tipo === 'entrega') {
+      ordersList.push(p.productos || []);
+    }
+    ordersList.forEach(function(prods) {
+      prods.forEach(function(prod) {
+        if (prod.vendor) vendors[prod.vendor] = true;
+      });
+    });
+  });
+  return Object.keys(vendors).sort();
+}
+
 function renderProveedores() {
-  if(!Object.keys(vendorData).length) {
+  var allVendors = getAllVendors();
+  if (!allVendors.length) {
     document.getElementById('proveedores-content').innerHTML = '<div class="empty-msg">Sin datos. Toca Actualizar para cargar.</div>';
     return;
   }
@@ -507,10 +560,10 @@ function renderProveedores() {
   var estadoColors = {'Pasar a buscar':'#f4a259','Vienen a dejar':'#5a8e7d','En bodega':'#a1ac6f','En riesgo':'#bd4a52','—':'#ccc'};
   var html = '';
 
-  Object.keys(vendorData).sort().forEach(function(vendor) {
+  allVendors.forEach(function(vendor) {
     var estado = vendorMeta[vendor] || '—';
     var color = estadoColors[estado] || '#ccc';
-    var prods = vendorData[vendor]; // ["2x Nombre producto", ...]
+    var prods = vendorData[vendor] || []; // ["2x Nombre producto", ...]
 
     html += '<div class="prov-card">';
     html += '<div class="prov-header-title">';
@@ -522,15 +575,27 @@ function renderProveedores() {
     html += '<thead><tr><th>Producto</th><th>Etiqueta</th></tr></thead>';
     html += '<tbody>';
     prods.forEach(function(entry) {
-      // entry is "2x Nombre producto"
+      // Verificar si este producto sigue activo en algún pedido (no eliminado de todos)
+      var active = isProdActiveForVendor(entry, vendor);
       var pkey = entry + '||' + vendor;
-      var meta = productMeta[pkey] || {};
+      // Buscar productMeta con clave exacta o sin prefijo de cantidad
+      var meta = productMeta[pkey];
+      if (!meta) {
+        var stripped = entry.replace(/^\d+x\s+/i, '').trim();
+        Object.keys(productMeta).forEach(function(k) {
+          if (!meta && k.split('||')[1] === vendor) {
+            var kn = k.split('||')[0];
+            if (kn === entry || kn.replace(/^\d+x\s+/i,'').trim() === stripped) meta = productMeta[k];
+          }
+        });
+      }
+      meta = meta || {};
       var etiqueta = '';
       if(meta.c) etiqueta += '<span class="tag tag-c">&#10052; Congelar</span> ';
       if(meta.r) etiqueta += '<span class="tag tag-r">&#10052; Refrigerar</span> ';
       if(meta.nota) etiqueta += '<span class="tag tag-nota">&#128203; ' + meta.nota + '</span>';
 
-      html += '<tr>';
+      html += '<tr' + (active ? '' : ' style="opacity:.4;text-decoration:line-through"') + '>';
       html += '<td class="prov-prod-name">' + entry + '</td>';
       html += '<td>' + (etiqueta || '<span style="color:#bbb;font-size:12px">—</span>') + '</td>';
       html += '</tr>';

@@ -302,7 +302,7 @@ function processCSV(file) {
     Object.keys(pickups).forEach(function(label) {
       var mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(label + ', Puerto Varas');
       paradas.push({ id:pid++, tipo:'punto-retiro', nombre:label, direccion:label, mapUrl:mapUrl, telefono:'', notas:'', clientes: pickups[label].map(function(o) {
-        return { orderNum:o.orderNum, custName:o.custName, phone:o.phone, productos:o.items.map(function(it){ return {nombre:it.nombre, qty:it.qty+' unid.'}; }), pago:{monto:0, metodo:'Ya pagado online'} };
+        return { orderNum:o.orderNum, custName:o.custName, phone:o.phone, productos:o.items.map(function(it){ return {nombre:it.nombre, qty:it.qty+' unid.', vendor:it.vendor||''}; }), pago:{monto:0, metodo:'Ya pagado online'} };
       })});
     });
 
@@ -310,7 +310,7 @@ function processCSV(file) {
       var addr = [o.addr1, o.addr2, o.city].filter(Boolean).join(', ');
       var mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(addr);
       var cobrar = (o.status !== 'paid' && o.total > 0);
-      paradas.push({ id:pid++, tipo:'entrega', orderNum:o.orderNum, nombre:o.custName, direccion:addr, telefono:o.phone, mapUrl:mapUrl, notas:o.notes, pago:{monto:cobrar?o.total:0, metodo:cobrar?'Cobrar en entrega':'Ya pagado online'}, productos:o.items.map(function(it){ return {nombre:it.nombre, qty:it.qty+' unid.'}; }) });
+      paradas.push({ id:pid++, tipo:'entrega', orderNum:o.orderNum, nombre:o.custName, direccion:addr, telefono:o.phone, mapUrl:mapUrl, notas:o.notes, pago:{monto:cobrar?o.total:0, metodo:cobrar?'Cobrar en entrega':'Ya pagado online'}, productos:o.items.map(function(it){ return {nombre:it.nombre, qty:it.qty+' unid.', vendor:it.vendor||''}; }) });
     });
 
     // Update local state

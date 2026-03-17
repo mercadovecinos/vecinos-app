@@ -129,8 +129,25 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
   .vm-estado-sel{background:var(--bg);color:var(--ch);border-color:#2a4a2a}
   .km-in{border-color:#2a4a2a}
   input[type="number"],input[type="text"],textarea,select{background:var(--bg);color:var(--ch)}
+  .ped-prod-nom{color:var(--ch)}
 }
-</style></head><body><div class="toast" id="toast"></div><div class="hdr"><div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_7.png?v=1767640340" alt="Vecinos"></div><span style="position:absolute;left:50%;transform:translateX(-50%);color:white;font-weight:800;font-size:15px;letter-spacing:.3px">Admin App</span><button class="badge" id="badge">Cargando...</button></div><div class="tabs"><button class="tab active" data-tab="archivo">&#128196; Archivo</button><button class="tab" data-tab="misiones">&#127937; Misiones</button><button class="tab" data-tab="ruta">&#128260; Ruta</button><button class="tab" data-tab="progreso">&#128506; Progreso</button><button class="tab" data-tab="pedidos">&#128230; Pedidos</button></div><div class="panel active" id="panel-archivo"><div class="stitle">Archivo semanal de pedidos</div><div class="upload-zone" id="uploadZone"><div class="upload-ico">&#128196;</div><div class="upload-lbl">Sube el CSV de Shopify</div><div class="upload-sub">Arrastra aqui o toca para seleccionar</div><label class="upload-btn">Seleccionar archivo<input type="file" id="fileInput" accept=".csv"></label></div><div class="archivo-ok" id="archivoOk"><div class="archivo-ok-title">&#10003; Productores encontrados esta semana</div><div class="vendor-preview"></div></div>
+/* Forzar dark */
+html.theme-dark{--bg:#111a11;--bg-card:#1b251b;--ch:#d8ead8;--gl:#1e3028;--gp:#1a2e1a;--pc:#2e1d08}
+html.theme-dark body{color-scheme:dark}
+html.theme-dark .vm-tag-btn{border-color:#3a5a3a;color:#7a9a7a}
+html.theme-dark .vm-nota-input,html.theme-dark .m-field input,html.theme-dark .m-field textarea,html.theme-dark .m-field select{background:var(--bg);color:var(--ch);border-color:#2a4a2a}
+html.theme-dark .vm-estado-sel{background:var(--bg);color:var(--ch);border-color:#2a4a2a}
+html.theme-dark .km-in{border-color:#2a4a2a}
+html.theme-dark input[type="number"],html.theme-dark input[type="text"],html.theme-dark textarea,html.theme-dark select{background:var(--bg);color:var(--ch)}
+html.theme-dark .ped-prod-nom{color:var(--ch)}
+/* Forzar light (cancela dark del sistema) */
+html.theme-light{--bg:#f4f7f4;--bg-card:white;--ch:#2a2a2a;--gl:#cdece2;--gp:#ccdcd6;--pc:#ffdeb6}
+html.theme-light body{color-scheme:light}
+html.theme-light .vm-tag-btn{border-color:#ddd;color:#999}
+html.theme-light .vm-nota-input,html.theme-light .m-field input,html.theme-light .m-field textarea,html.theme-light .m-field select{background:white;color:#2a2a2a;border-color:var(--gp)}
+html.theme-light .vm-estado-sel,html.theme-light input,html.theme-light textarea,html.theme-light select{background:white;color:#2a2a2a}
+html.theme-light .ped-prod-nom{color:#333}
+</style><script>(function(){var t=localStorage.getItem('vecinos_theme');if(t)document.documentElement.classList.add('theme-'+t);})();</script></head><body><div class="toast" id="toast"></div><div class="hdr"><div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_7.png?v=1767640340" alt="Vecinos"></div><span style="position:absolute;left:50%;transform:translateX(-50%);color:white;font-weight:800;font-size:15px;letter-spacing:.3px">Admin App</span><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><button class="badge" id="badge">Cargando...</button><button id="theme-btn" onclick="toggleTheme()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;padding:3px 8px;font-size:11px;font-weight:700;color:rgba(255,255,255,.8);cursor:pointer;font-family:inherit">&#9728; Claro</button></div></div><div class="tabs"><button class="tab active" data-tab="archivo">&#128196; Archivo</button><button class="tab" data-tab="misiones">&#127937; Misiones</button><button class="tab" data-tab="ruta">&#128260; Ruta</button><button class="tab" data-tab="progreso">&#128506; Progreso</button><button class="tab" data-tab="pedidos">&#128230; Pedidos</button></div><div class="panel active" id="panel-archivo"><div class="stitle">Archivo semanal de pedidos</div><div class="upload-zone" id="uploadZone"><div class="upload-ico">&#128196;</div><div class="upload-lbl">Sube el CSV de Shopify</div><div class="upload-sub">Arrastra aqui o toca para seleccionar</div><label class="upload-btn">Seleccionar archivo<input type="file" id="fileInput" accept=".csv"></label></div><div class="archivo-ok" id="archivoOk"><div class="archivo-ok-title">&#10003; Productores encontrados esta semana</div><div class="vendor-preview"></div></div>
 <div style="margin-top:28px;padding-top:20px;border-top:2px solid var(--gp)">
 <div class="stitle" style="color:#bd4a52">Zona de peligro</div>
 <p style="font-size:14px;color:var(--gm);margin:8px 0 14px">Borra toda la información del día actual: paradas, misiones, km y progreso.</p>
@@ -142,7 +159,7 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
 <button class="save-csv-btn" id="ruta-save-btn" style="display:none;margin-top:8px" onclick="saveRutaOrder()">Guardar orden</button>
 <div id="ruta-saved" style="display:none;background:var(--gl);border-radius:14px;padding:14px;text-align:center;font-size:16px;font-weight:700;color:var(--gd);margin-top:12px">&#10003; Orden guardado</div>
 </div>
-<div class="panel" id="panel-progreso"><div class="fecha" id="fecha">Cargando...</div><div class="stats"><div class="stat"><div class="n" id="sDone">-</div><div class="l">Listas</div></div><div class="stat"><div class="n" id="sTotal">-</div><div class="l">Total</div></div><div class="stat"><div class="n" id="sPct">-</div><div class="l">Avance</div></div></div><div class="pbar-wrap"><div class="pbar" id="pbar" style="width:0%"></div></div><div style="background:var(--bg-card);border-radius:14px;padding:14px 16px;margin:12px 0;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(60,90,60,.08)"><span style="font-size:15px;font-weight:700;color:var(--ch)">&#128230; Pedidos cargados</span><span style="font-size:22px;font-weight:900;color:var(--gd)" id="pedidosCargados">-</span></div><div class="stitle">Picker</div><div id="picker-status" style="margin-bottom:16px"><div class="m-empty" style="padding:12px">Cargando...</div></div><div class="stitle">Estado en tiempo real</div><div id="stops"></div><div id="misiones-status" style="display:none"></div><div id="km-status" style="display:none"></div><div class="refresh">Toca el badge para actualizar &middot; auto cada 60s</div></div><div class="panel" id="panel-pedidos">
+<div class="panel" id="panel-progreso"><div class="fecha" id="fecha">Cargando...</div><div style="background:var(--bg-card);border-radius:14px;padding:14px 16px;margin:0 0 8px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(60,90,60,.08)"><span style="font-size:15px;font-weight:700;color:var(--ch)">&#128506; Repartidor</span><span style="font-size:22px;font-weight:900;color:var(--gd)" id="sRepartidor">-</span></div><div style="background:var(--bg-card);border-radius:14px;padding:14px 16px;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(60,90,60,.08)"><span style="font-size:15px;font-weight:700;color:var(--ch)">&#128230; Pedidos cargados</span><span style="font-size:22px;font-weight:900;color:var(--gd)" id="pedidosCargados">-</span></div><div class="stitle">Picker</div><div id="picker-status" style="margin-bottom:16px"><div class="m-empty" style="padding:12px">Cargando...</div></div><div class="stitle">Estado de ruta en tiempo real</div><div id="stops"></div><div id="misiones-status" style="display:none"></div><div id="km-status" style="display:none"></div><div class="refresh">Toca el badge para actualizar &middot; auto cada 60s</div></div><div class="panel" id="panel-pedidos">
 <div style="padding:8px 0 16px">
   <div class="stitle" style="margin-bottom:12px">Pedidos del día</div>
   <div id="pedidos-loading" style="color:#888;font-size:15px;padding:8px 0">Cargando...</div>
@@ -162,6 +179,7 @@ var vendorData = {};
 var prodOverrides = {}; // {orderKey: {deleted:[idx], qty:{idx:newQty}, sinReparto:bool, direccion:str}}
 var vendorMeta    = {}; // {vendorName: estado}
 var productMeta   = {}; // {"prodName||vendorName": {c, r, nota}}
+var _csvUploaded  = false; // evita que respuestas async sobreescriban vendorData post CSV upload
 
 // ── TABS ────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab').forEach(function(tab) {
@@ -244,7 +262,7 @@ function processCSV(file) {
       var qty   = (cols[qtyIdx]     || '1').trim();
       var oNum  = (cols[orderIdx]   || '').trim();
 
-      if (v && item && v !== 'Vecinos') {
+      if (v && item && v !== 'Vecinos' && item.toLowerCase() !== 'tip') {
         if (!vendorData[v]) vendorData[v] = [];
         var entry = qty + 'x ' + item;
         if (vendorData[v].indexOf(entry) === -1) vendorData[v].push(entry);
@@ -283,7 +301,7 @@ function processCSV(file) {
         if (!orders[oNum].status  && status)         orders[oNum].status   = status;
       }
 
-      if (item) orders[oNum].items.push({ nombre:item, qty:qty, vendor:v });
+      if (item && item.toLowerCase() !== 'tip') orders[oNum].items.push({ nombre:item, qty:qty, vendor:v });
     }
 
     // Build paradas
@@ -323,13 +341,14 @@ function processCSV(file) {
     });
 
     // Update local state
+    _csvUploaded = true; // bloquea respuestas GAS async que podrían sobreescribir vendorData
     var prevRutaId = RUTA_ID; // capturar antes de actualizar (para detectar cambio de semana)
     RUTA_ID = newRutaId;
     FECHA   = newFecha;
+    document.getElementById('fecha').textContent = newFecha;
 
-    // Reset vendorMeta local para la semana nueva
-    vendorMeta = {};
-    Object.keys(vendorData).forEach(function(v){ vendorMeta[v] = '—'; });
+    // Mantener estados existentes de vendorMeta; solo agregar nuevos vendors con '—'
+    Object.keys(vendorData).forEach(function(v){ if (!vendorMeta[v]) vendorMeta[v] = '—'; });
 
     // Save everything to Apps Script in one call
     fetch(SCRIPT_URL, {
@@ -341,10 +360,10 @@ function processCSV(file) {
       else showT('Error guardando ruta');
     }).catch(function(){ showT('Error de conexion'); });
 
-    // Limpiar vendorMeta en GAS y guardar estado fresco para esta semana
+    // Guardar vendorMeta (preservando estados de semanas anteriores para vendors conocidos)
     fetch(SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta, clear: true })
+      body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta })
     }).catch(function(){});
 
     rutaParadas = paradas;
@@ -676,7 +695,7 @@ function loadData() {
         fetch(SCRIPT_URL + '?action=vendors&ruta_id=' + encodeURIComponent(RUTA_ID))
           .then(function(r){ return r.json(); })
           .then(function(res2){
-            if (res2.vendors && Object.keys(res2.vendors).length) {
+            if (!_csvUploaded && res2.vendors && Object.keys(res2.vendors).length) {
               vendorData = res2.vendors;
               updateVendorSelect();
             }
@@ -700,10 +719,7 @@ function loadProgress() {
       });
       document.getElementById('stops').innerHTML = html || '<div class="m-empty">Sin paradas aun</div>';
       var total = PARADAS.length;
-      document.getElementById('sDone').textContent = done;
-      document.getElementById('sTotal').textContent = total;
-      document.getElementById('sPct').textContent = total ? Math.round(done/total*100)+'%' : '-';
-      document.getElementById('pbar').style.width = total ? (done/total*100)+'%' : '0%';
+      document.getElementById('sRepartidor').textContent = done + ' / ' + total;
       var now = new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
       document.getElementById('badge').textContent = 'Actualizado ' + now;
       document.getElementById('pedidosCargados').textContent = done + ' / ' + total;
@@ -725,16 +741,18 @@ function loadPickerStatus() {
             var ov = prodOverrides[cl.orderNum] || null;
             if(ov && ov.sinReparto) return;
             var deleted = (ov && ov.deleted) ? ov.deleted : [];
-            var total = (cl.productos || []).length - deleted.length;
-            orders.push({ key: cl.orderNum, total: total });
+            var sinTip = (cl.productos || []).filter(function(pr){ return (pr.nombre||'').toLowerCase() !== 'tip'; });
+            var total = sinTip.length - deleted.filter(function(i){ return i < sinTip.length; }).length;
+            orders.push({ key: cl.orderNum, total: total, productos: sinTip });
           });
         } else if(p.tipo === 'entrega') {
           var key = '#'+p.id;
           var ov = prodOverrides[key] || null;
           if(ov && ov.sinReparto) return;
           var deleted = (ov && ov.deleted) ? ov.deleted : [];
-          var total = (p.productos || []).length - deleted.length;
-          orders.push({ key: key, total: total });
+          var sinTip = (p.productos || []).filter(function(pr){ return (pr.nombre||'').toLowerCase() !== 'tip'; });
+          var total = sinTip.length - deleted.filter(function(i){ return i < sinTip.length; }).length;
+          orders.push({ key: key, total: total, productos: sinTip });
         }
       });
       var preparados = 0, incompletos = 0, pendientes = 0;
@@ -988,7 +1006,7 @@ function loadInitial() {
   fetch(SCRIPT_URL + '?action=vendors&ruta_id=' + encodeURIComponent(RUTA_ID))
     .then(function(r){ return r.json(); })
     .then(function(res){
-      if (res.vendors && Object.keys(res.vendors).length) {
+      if (!_csvUploaded && res.vendors && Object.keys(res.vendors).length) {
         vendorData = res.vendors;
         showArchivoOk('(archivo anterior)');
         updateVendorSelect();
@@ -1219,4 +1237,22 @@ loadVendorAndProductMeta(function() {
   // re-render productor section if CSV already loaded
   if (Object.keys(vendorData).length > 0) renderProductorSection();
 });
+
+// ── THEME TOGGLE ──────────────────────────────────────────────────────
+function toggleTheme() {
+  var html = document.documentElement;
+  var saved = localStorage.getItem('vecinos_theme');
+  var next = saved === 'dark' ? 'light' : 'dark';
+  html.classList.remove('theme-dark', 'theme-light');
+  html.classList.add('theme-' + next);
+  localStorage.setItem('vecinos_theme', next);
+  updateThemeBtn();
+}
+function updateThemeBtn() {
+  var btn = document.getElementById('theme-btn');
+  if (!btn) return;
+  var saved = localStorage.getItem('vecinos_theme');
+  btn.innerHTML = saved === 'dark' ? '&#9790; Oscuro' : '&#9728; Claro';
+}
+updateThemeBtn();
 </script></body></html>

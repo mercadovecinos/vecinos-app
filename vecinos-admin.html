@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Vecinos · Admin</title><link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
-:root{--gd:#3d5a40;--gm:#5a8e7d;--gl:#cdece2;--gp:#ccdcd6;--ol:#7a9645;--ch:#2a2a2a;--or:#f4a259;--pc:#ffdeb6;--bg:#f4f7f4;--wsp:#075E54;--red:#c0392b}
+:root{--gd:#3d5a40;--gm:#5a8e7d;--gl:#cdece2;--gp:#ccdcd6;--ol:#7a9645;--ch:#2a2a2a;--or:#f4a259;--pc:#ffdeb6;--bg:#f4f7f4;--bg-card:white;--wsp:#075E54;--red:#c0392b}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 html,body{width:100%;overflow-x:hidden}
@@ -7,13 +7,13 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
 .hdr{background:var(--gd);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 16px rgba(40,70,42,.3);position:sticky;top:0;z-index:100}
 .logo img{height:42px;object-fit:contain}
 .badge{background:rgba(255,255,255,.18);color:white;padding:9px 18px;border-radius:22px;font-size:14px;cursor:pointer;font-weight:700;border:none;font-family:'Readex Pro',sans-serif}
-.tabs{display:flex;background:white;border-bottom:2px solid var(--gp);position:sticky;top:74px;z-index:99;overflow-x:auto}
+.tabs{display:flex;background:var(--bg-card);border-bottom:2px solid var(--gp);position:sticky;top:74px;z-index:99;overflow-x:auto}
 .tab{flex:1;min-width:80px;padding:14px 8px;border:none;background:none;font-family:'Readex Pro',sans-serif;font-size:13px;font-weight:700;color:#aaa;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
 .tab.active{color:var(--gd);border-bottom-color:var(--gm)}
 .panel{display:none;max-width:600px;margin:0 auto;padding:18px 16px}.panel.active{display:block}
 
 /* ARCHIVO */
-.upload-zone{background:white;border-radius:20px;padding:30px 20px;text-align:center;border:3px dashed var(--gp);cursor:pointer;transition:border-color .2s;margin-bottom:16px}
+.upload-zone{background:var(--bg-card);border-radius:20px;padding:30px 20px;text-align:center;border:3px dashed var(--gp);cursor:pointer;transition:border-color .2s;margin-bottom:16px}
 .upload-zone.drag{border-color:var(--gm);background:var(--gl)}
 .upload-zone.loaded{border-color:var(--ol);border-style:solid}
 .upload-ico{font-size:48px;margin-bottom:12px}
@@ -24,36 +24,36 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
 .archivo-ok{background:var(--gl);border-radius:16px;padding:16px 18px;margin-bottom:16px;display:none}
 .archivo-ok-title{font-size:15px;font-weight:800;color:var(--gd);margin-bottom:10px}
 .vendor-preview{display:flex;flex-direction:column;gap:8px}
-.vendor-row{background:white;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.vendor-row{background:var(--bg-card);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
 .vendor-name{font-weight:700;font-size:15px;color:var(--ch)}
 .vendor-cnt{font-size:13px;color:var(--gm);font-weight:600;background:var(--gl);padding:3px 10px;border-radius:10px}
-.vm-vendor{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.vm-vendor-header{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;background:white;border-bottom:1px solid var(--gl)}
+.vm-vendor{background:var(--bg-card);border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.vm-vendor-header{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;background:var(--bg-card);border-bottom:1px solid var(--gl)}
 .vm-vendor-name{font-weight:700;font-size:15px;color:var(--ch);flex:1}
 .vm-estado-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid #ccc;white-space:nowrap}
 .vm-toggle{font-size:12px;color:var(--gm)}
 .vm-vendor-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
 .vm-estado-row{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--gm)}
-.vm-estado-sel{flex:1;padding:7px 10px;border-radius:10px;border:1.5px solid var(--gp);font-size:13px;font-family:'Readex Pro',sans-serif;background:white}
+.vm-estado-sel{flex:1;padding:7px 10px;border-radius:10px;border:1.5px solid var(--gp);font-size:13px;font-family:'Readex Pro',sans-serif;background:var(--bg-card)}
 .vm-prods{display:flex;flex-direction:column;gap:6px}
 .vm-prod-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--gl);border-radius:10px;flex-wrap:wrap}
 .vm-prod-name{flex:1;font-size:13px;color:var(--ch);min-width:120px}
 .vm-prod-actions{display:flex;align-items:center;gap:6px}
-.vm-tag-btn{width:28px;height:28px;border-radius:8px;border:2px solid #ddd;background:white;font-weight:800;font-size:12px;cursor:pointer;color:#999;transition:all .15s}
+.vm-tag-btn{width:28px;height:28px;border-radius:8px;border:2px solid #ddd;background:var(--bg-card);font-weight:800;font-size:12px;cursor:pointer;color:#999;transition:all .15s}
 .vm-tag-btn.active[title="Congelado"]{background:#dbeafe;border-color:#3b82f6;color:#3b82f6}
 .vm-tag-btn.active[title="Refrigerado"]{background:#fce7f3;border-color:#ec4899;color:#ec4899}
-.vm-nota-input{border:1.5px solid #e5e7eb;border-radius:8px;padding:5px 10px;font-size:12px;font-family:'Readex Pro',sans-serif;color:var(--ch);background:white;width:130px;outline:none}
+.vm-nota-input{border:1.5px solid #e5e7eb;border-radius:8px;padding:5px 10px;font-size:12px;font-family:'Readex Pro',sans-serif;color:var(--ch);background:var(--bg-card);width:130px;outline:none}
 .vm-nota-input:focus{border-color:var(--gd)}
 .vm-save-btn{background:var(--gd);color:white;border:none;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;align-self:flex-end}
 .save-csv-btn{width:100%;padding:16px;border:none;border-radius:14px;background:var(--gd);color:white;font-family:'Readex Pro',sans-serif;font-size:17px;font-weight:800;cursor:pointer;margin-top:4px}
 
 /* MISIONES */
-.m-form{background:white;border-radius:20px;padding:22px;margin-bottom:16px;box-shadow:0 2px 12px rgba(60,90,60,.1)}
+.m-form{background:var(--bg-card);border-radius:20px;padding:22px;margin-bottom:16px;box-shadow:0 2px 12px rgba(60,90,60,.1)}
 .m-form h3{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--gm);margin-bottom:18px}
 .m-field{margin-bottom:14px}
 .m-field label{display:block;font-size:13px;font-weight:700;color:var(--gd);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .m-field input,.m-field textarea,.m-field select{width:100%;padding:14px 16px;border:2px solid var(--gp);border-radius:14px;font-family:'Readex Pro',sans-serif;font-size:16px;color:var(--ch);background:var(--bg);transition:border-color .2s;-webkit-appearance:none;appearance:none}
-.m-field input:focus,.m-field textarea:focus,.m-field select:focus{outline:none;border-color:var(--gm);background:white}
+.m-field input:focus,.m-field textarea:focus,.m-field select:focus{outline:none;border-color:var(--gm);background:var(--bg-card)}
 .m-field textarea{resize:vertical;min-height:80px;line-height:1.5}
 .m-field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a8e7d' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
 .m-add{width:100%;padding:16px;border:none;border-radius:14px;background:var(--gm);color:white;font-family:'Readex Pro',sans-serif;font-size:17px;font-weight:800;cursor:pointer}
@@ -62,7 +62,7 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
 .prod-preview{background:var(--gl);border-radius:12px;padding:12px 14px;margin-top:-8px;margin-bottom:14px;font-size:14px;color:var(--gd);line-height:1.7;display:none}
 .prod-preview strong{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--gm);margin-bottom:6px}
 .m-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
-.m-card{background:white;border-radius:18px;padding:18px;box-shadow:0 2px 10px rgba(60,90,60,.1);border-left:6px solid var(--or);display:flex;gap:14px;align-items:flex-start}
+.m-card{background:var(--bg-card);border-radius:18px;padding:18px;box-shadow:0 2px 10px rgba(60,90,60,.1);border-left:6px solid var(--or);display:flex;gap:14px;align-items:flex-start}
 .m-num{width:36px;height:36px;border-radius:50%;background:var(--pc);color:var(--ch);font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .m-info{flex:1;min-width:0}
 .m-name{font-weight:800;font-size:17px;color:var(--ch);margin-bottom:4px}
@@ -78,12 +78,12 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
 /* PROGRESO */
 .fecha{font-size:15px;color:var(--gm);font-weight:600;margin-bottom:16px;text-align:center}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
-.stat{background:white;border-radius:18px;padding:20px 10px;text-align:center;box-shadow:0 2px 10px rgba(60,90,60,.1)}
+.stat{background:var(--bg-card);border-radius:18px;padding:20px 10px;text-align:center;box-shadow:0 2px 10px rgba(60,90,60,.1)}
 .stat .n{font-size:38px;font-weight:800;color:var(--gm);line-height:1}
 .stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--gd);margin-top:6px;font-weight:700}
 .pbar-wrap{background:var(--gp);border-radius:10px;height:12px;overflow:hidden;margin-bottom:18px}
 .pbar{background:var(--ol);height:100%;border-radius:10px;transition:width .6s}
-.stop{background:white;border-radius:18px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(60,90,60,.08);border-left:6px solid var(--gp)}
+.stop{background:var(--bg-card);border-radius:18px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(60,90,60,.08);border-left:6px solid var(--gp)}
 .stop.done{border-left-color:var(--ol)}
 .snum{width:40px;height:40px;border-radius:50%;background:var(--gl);color:var(--gd);font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .stop.done .snum{background:var(--ol);color:white}
@@ -93,7 +93,7 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
 .tick{font-size:24px;flex-shrink:0;font-weight:800;color:var(--gm)}.stop.done .tick{color:var(--ol)}
 .refresh{font-size:14px;color:var(--gm);text-align:center;margin-top:18px;line-height:1.8;font-weight:500}
 
-.ruta-card{background:white;border-radius:18px;padding:16px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(60,90,60,.1);border-left:6px solid var(--gm);cursor:grab;transition:opacity .2s,transform .15s}
+.ruta-card{background:var(--bg-card);border-radius:18px;padding:16px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(60,90,60,.1);border-left:6px solid var(--gm);cursor:grab;transition:opacity .2s,transform .15s}
 .ruta-card.dragging{opacity:.4;transform:scale(.97)}
 .ruta-card.drag-over{border-top:3px solid var(--or)}
 .ruta-card.t-rec{border-left-color:var(--or)}
@@ -109,7 +109,7 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
 .toast{position:fixed;top:86px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--gd);color:white;padding:14px 30px;border-radius:36px;font-size:16px;font-weight:700;opacity:0;transition:all .25s;z-index:200;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-.ped-card{background:white;border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(60,90,60,.08)}
+.ped-card{background:var(--bg-card);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(60,90,60,.08)}
 .ped-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer}
 .ped-card-name{font-size:16px;font-weight:800;color:var(--gd)}
 .ped-card-num{font-size:13px;color:#888;font-weight:600}
@@ -121,6 +121,15 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
 .ped-prod-edit{background:#e8f4e8;color:var(--gd);border:none;border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer;flex-shrink:0}
 .ped-prod-deleted{opacity:.4;text-decoration:line-through}
 .ped-tag{font-size:12px;padding:3px 10px;border-radius:10px;font-weight:700;margin-left:6px}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#111a11;--bg-card:#1b251b;--ch:#d8ead8;--gl:#1e3028;--gp:#1a2e1a;--pc:#2e1d08}
+  body{color-scheme:dark}
+  .vm-tag-btn{border-color:#3a5a3a;color:#7a9a7a}
+  .vm-nota-input,.m-field input,.m-field textarea,.m-field select{background:var(--bg);color:var(--ch);border-color:#2a4a2a}
+  .vm-estado-sel{background:var(--bg);color:var(--ch);border-color:#2a4a2a}
+  .km-in{border-color:#2a4a2a}
+  input[type="number"],input[type="text"],textarea,select{background:var(--bg);color:var(--ch)}
+}
 </style></head><body><div class="toast" id="toast"></div><div class="hdr"><div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_7.png?v=1767640340" alt="Vecinos"></div><span style="position:absolute;left:50%;transform:translateX(-50%);color:white;font-weight:800;font-size:15px;letter-spacing:.3px">Admin App</span><button class="badge" id="badge">Cargando...</button></div><div class="tabs"><button class="tab active" data-tab="archivo">&#128196; Archivo</button><button class="tab" data-tab="misiones">&#127937; Misiones</button><button class="tab" data-tab="ruta">&#128260; Ruta</button><button class="tab" data-tab="progreso">&#128506; Progreso</button><button class="tab" data-tab="pedidos">&#128230; Pedidos</button></div><div class="panel active" id="panel-archivo"><div class="stitle">Archivo semanal de pedidos</div><div class="upload-zone" id="uploadZone"><div class="upload-ico">&#128196;</div><div class="upload-lbl">Sube el CSV de Shopify</div><div class="upload-sub">Arrastra aqui o toca para seleccionar</div><label class="upload-btn">Seleccionar archivo<input type="file" id="fileInput" accept=".csv"></label></div><div class="archivo-ok" id="archivoOk"><div class="archivo-ok-title">&#10003; Productores encontrados esta semana</div><div class="vendor-preview"></div></div>
 <div style="margin-top:28px;padding-top:20px;border-top:2px solid var(--gp)">
 <div class="stitle" style="color:#bd4a52">Zona de peligro</div>
@@ -133,7 +142,7 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);pa
 <button class="save-csv-btn" id="ruta-save-btn" style="display:none;margin-top:8px" onclick="saveRutaOrder()">Guardar orden</button>
 <div id="ruta-saved" style="display:none;background:var(--gl);border-radius:14px;padding:14px;text-align:center;font-size:16px;font-weight:700;color:var(--gd);margin-top:12px">&#10003; Orden guardado</div>
 </div>
-<div class="panel" id="panel-progreso"><div class="fecha" id="fecha">Cargando...</div><div class="stats"><div class="stat"><div class="n" id="sDone">-</div><div class="l">Listas</div></div><div class="stat"><div class="n" id="sTotal">-</div><div class="l">Total</div></div><div class="stat"><div class="n" id="sPct">-</div><div class="l">Avance</div></div></div><div class="pbar-wrap"><div class="pbar" id="pbar" style="width:0%"></div></div><div style="background:white;border-radius:14px;padding:14px 16px;margin:12px 0;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(60,90,60,.08)"><span style="font-size:15px;font-weight:700;color:var(--ch)">&#128230; Pedidos cargados</span><span style="font-size:22px;font-weight:900;color:var(--gd)" id="pedidosCargados">-</span></div><div class="stitle">Picker</div><div id="picker-status" style="margin-bottom:16px"><div class="m-empty" style="padding:12px">Cargando...</div></div><div class="stitle">Estado en tiempo real</div><div id="stops"></div><div id="misiones-status" style="display:none"></div><div id="km-status" style="display:none"></div><div class="refresh">Toca el badge para actualizar &middot; auto cada 60s</div></div><div class="panel" id="panel-pedidos">
+<div class="panel" id="panel-progreso"><div class="fecha" id="fecha">Cargando...</div><div class="stats"><div class="stat"><div class="n" id="sDone">-</div><div class="l">Listas</div></div><div class="stat"><div class="n" id="sTotal">-</div><div class="l">Total</div></div><div class="stat"><div class="n" id="sPct">-</div><div class="l">Avance</div></div></div><div class="pbar-wrap"><div class="pbar" id="pbar" style="width:0%"></div></div><div style="background:var(--bg-card);border-radius:14px;padding:14px 16px;margin:12px 0;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(60,90,60,.08)"><span style="font-size:15px;font-weight:700;color:var(--ch)">&#128230; Pedidos cargados</span><span style="font-size:22px;font-weight:900;color:var(--gd)" id="pedidosCargados">-</span></div><div class="stitle">Picker</div><div id="picker-status" style="margin-bottom:16px"><div class="m-empty" style="padding:12px">Cargando...</div></div><div class="stitle">Estado en tiempo real</div><div id="stops"></div><div id="misiones-status" style="display:none"></div><div id="km-status" style="display:none"></div><div class="refresh">Toca el badge para actualizar &middot; auto cada 60s</div></div><div class="panel" id="panel-pedidos">
 <div style="padding:8px 0 16px">
   <div class="stitle" style="margin-bottom:12px">Pedidos del día</div>
   <div id="pedidos-loading" style="color:#888;font-size:15px;padding:8px 0">Cargando...</div>
@@ -150,7 +159,7 @@ var FECHA      = '';   // display date for current ruta
 var PARADAS    = [];
 var misiones   = [];
 var vendorData = {};
-var prodOverrides = {}; // {orderKey: {deleted:[idx], qty:{idx:newQty}, orderDeleted:bool, direccion:str}}
+var prodOverrides = {}; // {orderKey: {deleted:[idx], qty:{idx:newQty}, sinReparto:bool, direccion:str}}
 var vendorMeta    = {}; // {vendorName: estado}
 var productMeta   = {}; // {"prodName||vendorName": {c, r, nota}}
 
@@ -314,6 +323,7 @@ function processCSV(file) {
     });
 
     // Update local state
+    var prevRutaId = RUTA_ID; // capturar antes de actualizar (para detectar cambio de semana)
     RUTA_ID = newRutaId;
     FECHA   = newFecha;
 
@@ -337,7 +347,10 @@ function processCSV(file) {
       body: JSON.stringify({ action:'saveVendorMeta', meta: vendorMeta, clear: true })
     }).catch(function(){});
 
-    rutaParadas = paradas; renderRutaList();
+    rutaParadas = paradas;
+    PARADAS = paradas; // actualizar tab Pedidos inmediatamente con los datos del CSV nuevo
+    if (prevRutaId !== newRutaId) prodOverrides = {}; // semana nueva → limpiar overrides viejos que contaminan ids reutilizados
+    renderRutaList();
     showArchivoOk(file.name, newFecha);
     updateVendorSelect();
     renderPedidos();
@@ -710,7 +723,7 @@ function loadPickerStatus() {
         if(p.tipo === 'punto-retiro') {
           (p.clientes || []).forEach(function(cl) {
             var ov = prodOverrides[cl.orderNum] || null;
-            if(ov && ov.orderDeleted) return;
+            if(ov && ov.sinReparto) return;
             var deleted = (ov && ov.deleted) ? ov.deleted : [];
             var total = (cl.productos || []).length - deleted.length;
             orders.push({ key: cl.orderNum, total: total });
@@ -718,7 +731,7 @@ function loadPickerStatus() {
         } else if(p.tipo === 'entrega') {
           var key = '#'+p.id;
           var ov = prodOverrides[key] || null;
-          if(ov && ov.orderDeleted) return;
+          if(ov && ov.sinReparto) return;
           var deleted = (ov && ov.deleted) ? ov.deleted : [];
           var total = (p.productos || []).length - deleted.length;
           orders.push({ key: key, total: total });
@@ -808,19 +821,19 @@ function renderRutaList() {
     if (p.tipo === 'punto-retiro') {
       var clientesFiltrados = (p.clientes||[]).filter(function(cl) {
         var ov = prodOverrides[cl.orderNum];
-        return !ov || !ov.orderDeleted;
+        return !ov || !ov.sinReparto;
       });
       return clientesFiltrados.length > 0;
     }
     var ovE = prodOverrides['#' + p.id];
-    return !ovE || !ovE.orderDeleted;
+    return !ovE || !ovE.sinReparto;
   });
 
   list.innerHTML = rutaFiltrada.map(function(p, i) {
     var tClass = p.tipo==='recogida'?'t-rec':p.tipo==='punto-retiro'?'t-ret':'';
     var tag = p.tipo==='punto-retiro'?'Retiro':p.tipo==='recogida'?'Recoger':'Entrega';
     var clientesFiltrados = p.tipo==='punto-retiro'
-      ? (p.clientes||[]).filter(function(cl){ var ov=prodOverrides[cl.orderNum]; return !ov||!ov.orderDeleted; })
+      ? (p.clientes||[]).filter(function(cl){ var ov=prodOverrides[cl.orderNum]; return !ov||!ov.sinReparto; })
       : null;
     var sub = p.tipo==='punto-retiro'
       ? clientesFiltrados.map(function(c){return c.custName;}).join(', ')
@@ -850,12 +863,12 @@ function renderRutaList() {
       if (item.tipo === 'punto-retiro') {
         (item.clientes || []).forEach(function(cl) {
           if (!prodOverrides[cl.orderNum]) prodOverrides[cl.orderNum] = {deleted:[], qty:{}};
-          prodOverrides[cl.orderNum].orderDeleted = true;
+          prodOverrides[cl.orderNum].sinReparto = true;
         });
       } else {
         var key = '#' + item.id;
         if (!prodOverrides[key]) prodOverrides[key] = {deleted:[], qty:{}};
-        prodOverrides[key].orderDeleted = true;
+        prodOverrides[key].sinReparto = true;
       }
       // Auto-guardar prodOverrides para que el picker lo reciba inmediatamente
       fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveProdOverrides', ruta_id: RUTA_ID, overrides: prodOverrides }) }).catch(function(){});
@@ -1023,7 +1036,7 @@ function renderPedidos() {
   list.innerHTML = '';
   orders.forEach(function(order) {
     var ov = prodOverrides[order.key] || {deleted:[], qty:{}};
-    if(ov.orderDeleted) {
+    if(ov.sinReparto) {
       var card = document.createElement('div');
       card.className = 'ped-card';
       card.style.opacity = '0.5';
@@ -1091,7 +1104,7 @@ function editDireccion(key) {
 }
 
 function restoreOrder(key) {
-  if(prodOverrides[key]) prodOverrides[key].orderDeleted = false;
+  if(prodOverrides[key]) prodOverrides[key].sinReparto = false;
   renderPedidos();
   showT('Pedido restaurado');
 }
@@ -1100,7 +1113,7 @@ function deleteOrder(key) {
   if(!confirm('\u00bfEliminar pedido completo de "' + key + '"?')) return;
   if(!prodOverrides[key]) prodOverrides[key] = {deleted:[], qty:{}};
   // Mark as fully deleted
-  prodOverrides[key].orderDeleted = true;
+  prodOverrides[key].sinReparto = true;
   renderPedidos();
   showT('Pedido eliminado');
 }
@@ -1129,7 +1142,7 @@ function applyOverridesToRuta() {
 
   orders.forEach(function(order) {
     var ov = prodOverrides[order.key];
-    if(!ov || !ov.direccion || ov.orderDeleted) return;
+    if(!ov || !ov.direccion || ov.sinReparto) return;
     var newPunto = ov.direccion.trim();
     if(!customPuntos[newPunto]) customPuntos[newPunto] = [];
     customPuntos[newPunto].push(order);

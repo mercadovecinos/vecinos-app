@@ -1,5 +1,5 @@
 # Vecinos App — Contexto para Claude Code
-> Iteración 13 — Marzo 2026
+> Iteración 14 — Marzo 2026
 
 ## El proyecto
 
@@ -41,24 +41,35 @@ Este repo es una **app de gestión de rutas de delivery** con 3 apps + backend G
 
 ### vecinos-admin.html
 - Tab **Archivo**: sube CSV Shopify, extrae productores, genera ruta, sección de productores con estado recepción + tags C/R/nota por producto. Botón guardar al inicio y al final.
+  - `vendorMeta` persiste entre semanas (no se resetea al subir CSV nuevo — solo agrega vendors nuevos con `'—'`).
+  - Flag `_csvUploaded` evita race condition: bloquea callbacks async de GAS que podrían sobrescribir `vendorData` después de procesar el CSV.
+  - Producto "Tip" (case insensitive) se filtra en todas las vistas.
 - Tab **Misiones**: CRUD de misiones semanales.
-- Tab **Ruta**: reordenar paradas con drag&drop / flechas.
-- Tab **Progreso**: progreso del repartidor (paradas completadas) + **progreso del picker** (preparados/incompletos/pendientes con barra) + misiones + km.
+- Tab **Ruta**: reordenar paradas con drag&drop / flechas. Eliminar parada la marca `sinReparto:true` en prodOverrides (el picker igual la ve y la prepara).
+- Tab **Progreso**: fila compacta "Repartidor X/Y" + progreso del picker (preparados/incompletos/pendientes con barra) + misiones + km.
 - Tab **Pedidos**: edición de productos por pedido (eliminar, cambiar qty, cambiar dirección).
+- Dark mode: slider ☀/🌙 bajo el logo. Clase `html.theme-dark` / `html.theme-light` en `<html>`. Script inline en `<head>` para evitar FOUC.
 
 ### vecinos-repartidor.html
 - Offline-first con localStorage cache (18h) y sync queue.
 - Sistema de misiones con toggle done.
-- Tracking de km con envío por WhatsApp.
-- Prod overrides (productos editados/eliminados desde admin).
+- Tracking de km con envío por WhatsApp. Al resetear ruta, limpia los campos km si GAS devuelve vacío.
+- Prod overrides (productos editados/eliminados desde admin). Polling cada 60s — si cambia, muestra banner naranja "El admin actualizó los pedidos".
+- Tab **Carga**: muestra estado de preparación del picker (✅ Preparado / ⏳ Incompleto / ❌ No iniciado) por pedido.
+- Paradas filtradas (`!p._deleted`) y renumeradas secuencialmente al renderizar (no muestra IDs originales del CSV).
+- Header muestra "actualizado HH:MM" al terminar de cargar datos.
 - Banner rojo cuando sin conexión.
+- Dark mode: slider ☀/🌙 bajo el logo (mismo patrón que admin/picker).
 
 ### vecinos-picker.html
 - Tab **Resumen**: conteo preparados/pendientes/incompletos con números grandes, barra de progreso, productores por estado, lista "Vienen a dejar".
+  - Vendors en lista "Vienen a dejar" son clickeables → confirm → cambia estado a "En bodega" y guarda en GAS.
 - Tab **Pedidos**: lista de pedidos con checkbox por producto, filtro por estado, tags C/R/nota visibles, auto-save a GAS (debounce 1.5s).
 - Tab **Productores**: tabla por productor con sus productos (de `vendorData`), estado badge, columnas Producto / Etiqueta (Congelar/Refrigerar/nota desde `productMeta`).
 - Carga: `paradas` + `vendors` + `vendorMeta` + `productMeta` + `pickerProgress` (5 requests paralelos con timeout 12s de seguridad).
-- Diseño idéntico al admin: mismas variables CSS, mismo header, misma tipografía (Readex Pro, sin Yusei Magic).
+- Polling cada 90s de `prodOverrides` — si cambia, muestra banner naranja "El admin modificó pedidos — Actualizar" (no recarga automático).
+- Producto "Tip" filtrado en todas las vistas.
+- Dark mode: slider ☀/🌙 bajo el logo (mismo patrón que admin/repartidor).
 
 ---
 
@@ -76,7 +87,8 @@ vendorData = { "Borlone": ["2x Leche entera", "1x Queso chanco"] }
 vendorMeta = { "Borlone": "Vienen a dejar" }
 
 // prodOverrides: ediciones del admin sobre pedidos
-prodOverrides = { "#1234": { deleted:[0,2], qty:{1:"2 unid."}, orderDeleted:true, direccion:"CASA RUDA" } }
+// sinReparto:true = pedido existe pero NO va en ruta del repartidor (otro canal de entrega)
+prodOverrides = { "#1234": { deleted:[0,2], qty:{1:"2 unid."}, sinReparto:true, direccion:"CASA RUDA" } }
 
 // pickerProgress: índices chequeados por pedido
 pickerProgress = { "#1234": [0, 2], "#1235": [0, 1, 2] }
@@ -122,6 +134,7 @@ function gasPost(payload, cb) {
 - **Colores:** `--gd:#3d5a40` (verde oscuro), `--gm:#5a8e7d` (verde medio), `--gl:#cdece2` (verde claro), `--or:#f4a259` (naranja), `--ol:#7a9645` (oliva)
 - **Tipografía:** Readex Pro (todo) — Yusei Magic solo en títulos del brand, NO en las apps
 - **Logo URL:** `https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_2.png?v=1772739099`
+- **Dark mode:** variables `--bg:#111a11`, `--bg-card:#1b251b`, `--ch:#d8ead8`, `--gl:#1e3028`, `--gp:#1a2e1a`, `--pc:#2e1d08`. Se activa con clase `html.theme-dark` (forzado) o `@media(prefers-color-scheme:dark)` (sistema). Toggle slider ☀/🌙 persiste en `localStorage('vecinos_theme')`.
 
 ---
 
@@ -142,7 +155,7 @@ function gasPost(payload, cb) {
 
 - **GAS:** siempre desplegar como "Nueva versión" + correr `autorizar()`
 - **Admin:** corre local desde `file://`, no necesita deploy
-- **GitHub:** Add file → Upload files → Commit changes
+- **GitHub:** `git add`, `git commit`, `git push` desde CLI (el repo está en `/Users/jtpetour/Desktop/VecinOPS`)
 - **Mobile cache:** hard refresh si la app muestra versión vieja
 
 ---

@@ -27,7 +27,7 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);mi
 .panel.active{display:block}
 
 /* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ch);color:white;padding:12px 22px;border-radius:14px;font-size:14px;font-weight:700;opacity:0;transition:opacity .3s;z-index:999;pointer-events:none;white-space:nowrap}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gd);color:white;padding:12px 22px;border-radius:14px;font-size:14px;font-weight:700;opacity:0;transition:opacity .3s;z-index:999;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
 
 /* ── RESUMEN ──────────────────────────────────────────── */
@@ -50,7 +50,7 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);mi
 
 .vienen-list{background:var(--bg-card);border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .vienen-title{font-size:13px;font-weight:700;color:var(--gm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
-.vienen-vendor{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gl)}
+.vienen-vendor{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gl);cursor:pointer}
 .vienen-vendor:last-child{border-bottom:none}
 .vienen-dot{width:8px;height:8px;border-radius:50%;background:var(--gd);flex-shrink:0}
 .vienen-vname{font-size:14px;font-weight:600}
@@ -118,7 +118,17 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);mi
   .prov-table th,.prov-table td{border-color:#2a4a2a}
   input,textarea,select{background:var(--bg);color:var(--ch);border-color:#2a4a2a}
 }
+html.theme-dark{--bg:#111a11;--bg-card:#1b251b;--ch:#d8ead8;--gl:#1e3028;--gp:#1a2e1a;--pc:#2e1d08}
+html.theme-dark body{color-scheme:dark}
+html.theme-dark .prod-check{border-color:#3a5a3a}
+html.theme-dark .filter-btn{border-color:#2a4a2a;color:var(--gm)}
+html.theme-dark .pedido-num{color:var(--ch)}
+html.theme-dark .prov-table th,html.theme-dark .prov-table td{border-color:#2a4a2a}
+html.theme-dark input,html.theme-dark textarea,html.theme-dark select{background:var(--bg);color:var(--ch);border-color:#2a4a2a}
+html.theme-light{--bg:#f4f7f4;--bg-card:white;--ch:#2a2a2a;--gl:#cdece2;--gp:#ccdcd6;--pc:#ffdeb6}
+html.theme-light body{color-scheme:light}
 </style>
+<script>(function(){var t=localStorage.getItem('vecinos_theme');if(t)document.documentElement.classList.add('theme-'+t);})();</script>
 </head>
 <body>
 
@@ -130,8 +140,9 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);mi
 <div class="hdr">
   <div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_2.png?v=1772739099" alt="Vecinos"></div>
   <span style="position:absolute;left:50%;transform:translateX(-50%);color:white;font-weight:800;font-size:15px;letter-spacing:.3px">Picker App</span>
-  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
     <button class="badge-sync" onclick="loadAll()">&#8635; Actualizar</button>
+    <button id="theme-btn" onclick="toggleTheme()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;padding:3px 8px;font-size:11px;font-weight:700;color:rgba(255,255,255,.8);cursor:pointer;font-family:inherit">&#9728; Claro</button>
     <span id="last-updated" style="font-size:10px;color:rgba(255,255,255,.55);font-weight:600"></span>
   </div>
 </div>
@@ -286,12 +297,12 @@ function getAllOrders() {
     if(p.tipo === 'punto-retiro') {
       p.clientes.forEach(function(cl) {
         var ov = prodOverrides[cl.orderNum] || null;
-        orders.push({ key: cl.orderNum, displayNum: cl.orderNum, nombre: cl.custName, lugar: p.nombre, productos: cl.productos || [], ov: ov, tipo: 'retiro' });
+        orders.push({ key: cl.orderNum, displayNum: cl.orderNum, nombre: cl.custName, lugar: p.nombre, productos: (cl.productos || []).filter(function(pr){ return (pr.nombre||'').toLowerCase() !== 'tip'; }), ov: ov, tipo: 'retiro' });
       });
     } else if(p.tipo === 'entrega') {
       var key = '#'+p.id;
       var ov = prodOverrides[key] || null;
-      orders.push({ key: key, displayNum: p.orderNum || key, nombre: p.nombre, lugar: ov && ov.direccion ? ov.direccion : p.direccion, productos: p.productos || [], ov: ov, tipo: 'entrega' });
+      orders.push({ key: key, displayNum: p.orderNum || key, nombre: p.nombre, lugar: ov && ov.direccion ? ov.direccion : p.direccion, productos: (p.productos || []).filter(function(pr){ return (pr.nombre||'').toLowerCase() !== 'tip'; }), ov: ov, tipo: 'entrega' });
     }
   });
   return orders;
@@ -399,7 +410,7 @@ function renderResumen() {
   if(vendorsVienen.length > 0) {
     html += '<div class="vienen-list"><div class="vienen-title">🚐 Vienen a dejar hoy</div>';
     vendorsVienen.forEach(function(v) {
-      html += '<div class="vienen-vendor"><div class="vienen-dot"></div><span class="vienen-vname">' + v + '</span></div>';
+      html += '<div class="vienen-vendor" onclick="vienenVendorClick(' + JSON.stringify(v) + ')"><div class="vienen-dot"></div><span class="vienen-vname">' + v + '</span><span style="font-size:12px;color:var(--gm);margin-left:auto">Cambiar →</span></div>';
     });
     html += '</div>';
   }
@@ -587,6 +598,7 @@ function renderProveedores() {
     html += '<thead><tr><th>Producto</th><th>Etiqueta</th></tr></thead>';
     html += '<tbody>';
     prods.forEach(function(entry) {
+      if ((entry.replace(/^\d+x\s+/i,'').trim()).toLowerCase() === 'tip') return; // nunca mostrar tip
       // Verificar si este producto sigue activo en algún pedido (no eliminado de todos)
       var active = isProdActiveForVendor(entry, vendor);
       var pkey = entry + '||' + vendor;
@@ -640,6 +652,35 @@ function pollOverrides() {
   });
 }
 setInterval(pollOverrides, 90000); // Cada 90 segundos
+
+// ── VIENEN A DEJAR: cambiar estado ────────────────────
+function vienenVendorClick(v) {
+  var ESTADOS = ['Pasar a buscar','Vienen a dejar','En bodega','En riesgo'];
+  var current = vendorMeta[v] || '—';
+  if (!confirm('¿' + v + ' ya dejó los productos?\nCambiar estado a "En bodega"\n\nEstado actual: ' + current)) return;
+  vendorMeta[v] = 'En bodega';
+  gasPost({ action: 'saveVendorMeta', meta: vendorMeta }, function(){});
+  renderResumen();
+  showToast('✓ ' + v + ' → En bodega');
+}
+
+// ── DARK / LIGHT MODE ────────────────────────────────
+function toggleTheme() {
+  var h = document.documentElement;
+  var saved = localStorage.getItem('vecinos_theme');
+  var next = saved === 'dark' ? 'light' : 'dark';
+  h.classList.remove('theme-dark', 'theme-light');
+  h.classList.add('theme-' + next);
+  localStorage.setItem('vecinos_theme', next);
+  updateThemeBtn();
+}
+function updateThemeBtn() {
+  var btn = document.getElementById('theme-btn');
+  if (!btn) return;
+  var saved = localStorage.getItem('vecinos_theme');
+  btn.innerHTML = saved === 'dark' ? '&#9790; Oscuro' : '&#9728; Claro';
+}
+updateThemeBtn();
 
 // ── INIT ──────────────────────────────────────────────
 loadAll();

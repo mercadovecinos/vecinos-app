@@ -17,6 +17,12 @@ body{font-family:'Readex Pro',sans-serif;background:var(--bg);color:var(--ch);mi
 /* HEADER */
 .hdr{background:var(--gd);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 3px 16px rgba(40,70,42,.3);position:sticky;top:0;z-index:100;position:relative}
 .logo img{height:42px;object-fit:contain}
+.theme-toggle{position:relative;display:inline-block;width:34px;height:18px}
+.theme-toggle input{opacity:0;width:0;height:0;position:absolute}
+.theme-slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.28);border-radius:18px;transition:.25s}
+.theme-slider:before{position:absolute;content:'';height:12px;width:12px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.25s}
+input:checked+.theme-slider{background:rgba(0,0,0,.35)}
+input:checked+.theme-slider:before{transform:translateX(16px)}
 .badge-sync{background:rgba(255,255,255,.18);color:white;padding:9px 18px;border-radius:22px;font-size:14px;cursor:pointer;font-weight:700;border:none;font-family:'Readex Pro',sans-serif}
 
 /* TABS */
@@ -138,11 +144,13 @@ html.theme-light body{color-scheme:light}
 </div>
 
 <div class="hdr">
-  <div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_2.png?v=1772739099" alt="Vecinos"></div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div class="logo"><img src="https://cdn.shopify.com/s/files/1/0669/2968/8745/files/Logos_Presentation_2.png?v=1772739099" alt="Vecinos"></div>
+    <div style="display:flex;align-items:center;gap:5px"><span style="font-size:13px;color:rgba(255,255,255,.7)">&#9728;</span><label class="theme-toggle"><input type="checkbox" id="theme-check" onchange="toggleTheme(this.checked)"><span class="theme-slider"></span></label><span style="font-size:13px;color:rgba(255,255,255,.7)">&#9790;</span></div>
+  </div>
   <span style="position:absolute;left:50%;transform:translateX(-50%);color:white;font-weight:800;font-size:15px;letter-spacing:.3px">Picker App</span>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
     <button class="badge-sync" onclick="loadAll()">&#8635; Actualizar</button>
-    <button id="theme-btn" onclick="toggleTheme()" style="background:rgba(255,255,255,.15);border:none;border-radius:12px;padding:3px 8px;font-size:11px;font-weight:700;color:rgba(255,255,255,.8);cursor:pointer;font-family:inherit">&#9728; Claro</button>
     <span id="last-updated" style="font-size:10px;color:rgba(255,255,255,.55);font-weight:600"></span>
   </div>
 </div>
@@ -665,20 +673,18 @@ function vienenVendorClick(v) {
 }
 
 // ── DARK / LIGHT MODE ────────────────────────────────
-function toggleTheme() {
+function toggleTheme(isDark) {
   var h = document.documentElement;
-  var saved = localStorage.getItem('vecinos_theme');
-  var next = saved === 'dark' ? 'light' : 'dark';
   h.classList.remove('theme-dark', 'theme-light');
-  h.classList.add('theme-' + next);
-  localStorage.setItem('vecinos_theme', next);
+  h.classList.add('theme-' + (isDark ? 'dark' : 'light'));
+  localStorage.setItem('vecinos_theme', isDark ? 'dark' : 'light');
   updateThemeBtn();
 }
 function updateThemeBtn() {
-  var btn = document.getElementById('theme-btn');
-  if (!btn) return;
+  var chk = document.getElementById('theme-check');
+  if (!chk) return;
   var saved = localStorage.getItem('vecinos_theme');
-  btn.innerHTML = saved === 'dark' ? '&#9790; Oscuro' : '&#9728; Claro';
+  chk.checked = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme:dark)').matches);
 }
 updateThemeBtn();
 

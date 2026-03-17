@@ -272,13 +272,11 @@ function getAllOrders() {
     if(p.tipo === 'punto-retiro') {
       p.clientes.forEach(function(cl) {
         var ov = prodOverrides[cl.orderNum] || null;
-        if(ov && ov.orderDeleted) return;
         orders.push({ key: cl.orderNum, displayNum: cl.orderNum, nombre: cl.custName, lugar: p.nombre, productos: cl.productos || [], ov: ov, tipo: 'retiro' });
       });
     } else if(p.tipo === 'entrega') {
       var key = '#'+p.id;
       var ov = prodOverrides[key] || null;
-      if(ov && ov.orderDeleted) return;
       orders.push({ key: key, displayNum: p.orderNum || key, nombre: p.nombre, lugar: ov && ov.direccion ? ov.direccion : p.direccion, productos: p.productos || [], ov: ov, tipo: 'entrega' });
     }
   });
@@ -424,7 +422,8 @@ function renderPedidos() {
 
     html += '<div class="pedido-card" id="order-' + order.key.replace('#','') + '">';
     html += '<div class="pedido-header">';
-    html += '<div><div class="pedido-num">' + order.displayNum + '</div><div class="pedido-nombre">' + order.nombre + '</div><div class="pedido-lugar">📍 ' + order.lugar + '</div></div>';
+    var sinReparto = (order.ov && order.ov.orderDeleted) ? '<span style="font-size:10px;background:#f0e6d3;color:#7a4500;border-radius:8px;padding:2px 7px;font-weight:700;margin-left:6px;vertical-align:middle">📌 Sin reparto</span>' : '';
+    html += '<div><div class="pedido-num">' + order.displayNum + sinReparto + '</div><div class="pedido-nombre">' + order.nombre + '</div><div class="pedido-lugar">📍 ' + order.lugar + '</div></div>';
     html += '<div class="pedido-estado-badge ' + estadoClass + '">' + estadoLabel + '</div>';
     html += '</div>';
 
@@ -513,7 +512,6 @@ function isProdActiveForVendor(nombre, vendor) {
     ordersList.forEach(function(o) {
       if (found) return;
       var ov = prodOverrides[o.key] || null;
-      if (ov && ov.orderDeleted) return;
       var deleted = (ov && ov.deleted) ? ov.deleted : [];
       (o.productos || []).forEach(function(prod, idx) {
         if (found) return;

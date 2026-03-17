@@ -844,10 +844,22 @@ function renderRutaList() {
       var i    = parseInt(this.dataset.del);
       var item = rutaFiltrada[i];
       var nombre = item.nombre || item.custName || 'esta parada';
-      if (!confirm('\u00bfEliminar "' + nombre + '"?')) return;
-      var srcIdx = rutaParadas.indexOf(item);
-      if (srcIdx >= 0) rutaParadas.splice(srcIdx, 1);
-      renumberParadas(); renderRutaList(); showT('Parada eliminada');
+      if (!confirm('\u00bfEliminar "' + nombre + '" de la ruta?\n(El picker igual puede prepararlo)')) return;
+      // Marcar como eliminado en prodOverrides en vez de hacer splice —
+      // así el picker sigue viendo el pedido en PARADAS y puede prepararlo
+      if (item.tipo === 'punto-retiro') {
+        (item.clientes || []).forEach(function(cl) {
+          if (!prodOverrides[cl.orderNum]) prodOverrides[cl.orderNum] = {deleted:[], qty:{}};
+          prodOverrides[cl.orderNum].orderDeleted = true;
+        });
+      } else {
+        var key = '#' + item.id;
+        if (!prodOverrides[key]) prodOverrides[key] = {deleted:[], qty:{}};
+        prodOverrides[key].orderDeleted = true;
+      }
+      // Auto-guardar prodOverrides para que el picker lo reciba inmediatamente
+      fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: JSON.stringify({ action:'saveProdOverrides', ruta_id: RUTA_ID, overrides: prodOverrides }) }).catch(function(){});
+      renderRutaList(); showT('Parada eliminada de la ruta');
     });
   });
 

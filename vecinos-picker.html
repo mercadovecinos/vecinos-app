@@ -429,7 +429,14 @@ function renderResumen() {
   if(vendorsVienen.length > 0) {
     html += '<div class="vienen-list"><div class="vienen-title">🚐 Vienen a dejar hoy</div>';
     vendorsVienen.forEach(function(v) {
-      html += '<div class="vienen-vendor" onclick="vienenVendorClick(' + JSON.stringify(v) + ')"><div class="vienen-dot"></div><span class="vienen-vname">' + v + '</span><span style="font-size:12px;color:var(--gm);margin-left:auto">Cambiar →</span></div>';
+      var vk = JSON.stringify(v);
+      html += '<div class="vienen-vendor"><div class="vienen-dot"></div><span class="vienen-vname">' + v + '</span>';
+      html += '<select onchange="setVendorEstado(' + vk + ',this.value)" style="margin-left:auto;font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--gp);background:var(--bg-card);color:var(--ch);font-family:inherit">';
+      html += '<option value="Vienen a dejar" selected>Vienen a dejar</option>';
+      html += '<option value="En bodega">✓ En bodega</option>';
+      html += '<option value="Pasar a buscar">Pasar a buscar</option>';
+      html += '<option value="En riesgo">En riesgo</option>';
+      html += '</select></div>';
     });
     html += '</div>';
   }
@@ -478,7 +485,7 @@ function renderPedidos() {
     orders = orders.filter(function(o) {
       if((o.displayNum || '').toLowerCase().indexOf(search) >= 0) return true;
       if((o.nombre || '').toLowerCase().indexOf(search) >= 0) return true;
-      return o.productos.some(function(p){ return (p.nombre||'').toLowerCase().indexOf(search) >= 0; });
+      return o.productos.some(function(p){ return (p.nombre||'').toLowerCase().indexOf(search) >= 0 || (p.vendor||'').toLowerCase().indexOf(search) >= 0; });
     });
   }
 
@@ -653,9 +660,12 @@ function renderProveedores() {
     var prods = vendorData[vendor] || []; // ["2x Nombre producto", ...]
 
     html += '<div class="prov-card">';
+    var ESTADOS_LIST = ['—','Pasar a buscar','Vienen a dejar','En bodega','En riesgo'];
     html += '<div class="prov-header-title">';
     html += '<span class="prov-name">' + vendor + '</span>';
-    html += '<span class="prov-estado-badge" style="background:' + color + '20;color:' + color + ';border:1px solid ' + color + '40">' + estado + '</span>';
+    html += '<select onchange="setVendorEstado(' + JSON.stringify(vendor) + ',this.value)" style="font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid ' + color + '60;background:' + color + '15;color:' + color + ';font-family:inherit;font-weight:700">';
+    ESTADOS_LIST.forEach(function(e){ html += '<option value="' + e + '"' + (e===estado?' selected':'') + '>' + e + '</option>'; });
+    html += '</select>';
     html += '</div>';
 
     html += '<table class="prov-table">';
@@ -717,15 +727,14 @@ function pollOverrides() {
 }
 setInterval(pollOverrides, 90000); // Cada 90 segundos
 
-// ── VIENEN A DEJAR: cambiar estado ────────────────────
-function vienenVendorClick(v) {
-  var ESTADOS = ['Pasar a buscar','Vienen a dejar','En bodega','En riesgo'];
-  var current = vendorMeta[v] || '—';
-  if (!confirm('¿' + v + ' ya dejó los productos?\nCambiar estado a "En bodega"\n\nEstado actual: ' + current)) return;
-  vendorMeta[v] = 'En bodega';
+// ── VENDOR ESTADO: cambiar estado desde picker ─────────
+function setVendorEstado(v, estado) {
+  if(!estado || estado === vendorMeta[v]) return;
+  vendorMeta[v] = estado;
   gasPost({ action: 'saveVendorMeta', meta: vendorMeta }, function(){});
   renderResumen();
-  showT('✓ ' + v + ' → En bodega');
+  renderProveedores();
+  showT('✓ ' + v + ' → ' + estado);
 }
 
 // ── DARK / LIGHT MODE ────────────────────────────────

@@ -172,10 +172,16 @@ html.theme-light body{color-scheme:light}
     <button class="filter-btn" data-filter="incompleto" onclick="setFilter('incompleto',this)">Incompleto</button>
     <button class="filter-btn" data-filter="preparado" onclick="setFilter('preparado',this)">Preparado</button>
   </div>
+  <div style="padding:10px 16px 4px">
+    <input type="search" id="pedidos-search" placeholder="🔍 Producto, N° pedido o cliente..." oninput="renderPedidos()" style="width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:1.5px solid var(--gp);background:var(--bg-card);color:var(--ch);font-size:14px;font-family:inherit;outline:none">
+  </div>
   <div id="pedidos-content"><div class="loading-msg"><div class="spin"></div><br>Cargando...</div></div>
 </div>
 
 <div class="panel" id="panel-proveedores">
+  <div style="padding:10px 16px 4px">
+    <input type="search" id="proveedores-search" placeholder="🔍 Productor o producto..." oninput="renderProveedores()" style="width:100%;box-sizing:border-box;padding:10px 14px;border-radius:12px;border:1.5px solid var(--gp);background:var(--bg-card);color:var(--ch);font-size:14px;font-family:inherit;outline:none">
+  </div>
   <div id="proveedores-content"><div class="loading-msg"><div class="spin"></div><br>Cargando...</div></div>
 </div>
 
@@ -188,6 +194,7 @@ var productMeta = {};    // {"NxProdName||vendor": {c,r,nota}}
 var vendorData = {};     // {vendor: ["2x Producto", ...]}
 var pickerProgress = {}; // {orderKey: [checkedIndices]}
 var prodOverrides = {};  // {orderKey: {deleted:[idx], qty:{idx:qty}, sinReparto:bool, direccion:str}}
+var misiones = [];       // [{nombre, mision, productos}]
 var RUTA_ID = '';
 var lastOverridesHash = ''; // para detección de cambios del admin
 var currentFilter = 'todos';
@@ -253,7 +260,7 @@ function loadAll() {
   var built = false;
   function check() {
     done++;
-    if(done >= 6 && !built) { built = true; buildAll(); showT('✓ Actualizado'); }
+    if(done >= 7 && !built) { built = true; buildAll(); showT('✓ Actualizado'); }
   }
   // Safety timeout: si algún request queda colgado, renderizar con lo que haya
   setTimeout(function() {
@@ -282,6 +289,10 @@ function loadAll() {
   });
   gasGet('prodOverrides', function(res) {
     if(res && res.ok && res.overrides) { prodOverrides = res.overrides; lastOverridesHash = JSON.stringify(prodOverrides); }
+    check();
+  });
+  gasGet('misiones', function(res) {
+    if(res && res.misiones) misiones = res.misiones;
     check();
   });
 }
@@ -423,6 +434,18 @@ function renderResumen() {
     html += '</div>';
   }
 
+  // Misiones
+  if(misiones.length > 0) {
+    html += '<div class="vienen-list"><div class="vienen-title">🎯 Misiones de hoy</div>';
+    misiones.forEach(function(m) {
+      html += '<div style="padding:10px 0;border-bottom:1px solid var(--gp)">';
+      html += '<div style="font-weight:700;color:var(--ch);font-size:15px">' + (m.nombre || '') + '</div>';
+      if(m.mision) html += '<div style="font-size:13px;color:var(--gm);margin-top:3px">' + m.mision + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
   document.getElementById('resumen-content').innerHTML = html || '<div class="empty-msg">Sin datos. Toca Actualizar para cargar.</div>';
 }
 
@@ -436,12 +459,31 @@ function setFilter(f, btn) {
 
 function renderPedidos() {
   var orders = getAllOrders();
+
+  // Sort ascending by order number
+  orders.sort(function(a, b) {
+    var na = parseInt((a.displayNum || a.key).replace(/[^\d]/g, '')) || 0;
+    var nb = parseInt((b.displayNum || b.key).replace(/[^\d]/g, '')) || 0;
+    return na - nb;
+  });
+
   if(currentFilter !== 'todos') {
     orders = orders.filter(function(o){ return getOrderEstado(o.key, o.productos, o.ov) === currentFilter; });
   }
 
+  // Search filter: by product name, order number or customer name
+  var searchEl = document.getElementById('pedidos-search');
+  var search = searchEl ? searchEl.value.toLowerCase().trim() : '';
+  if(search) {
+    orders = orders.filter(function(o) {
+      if((o.displayNum || '').toLowerCase().indexOf(search) >= 0) return true;
+      if((o.nombre || '').toLowerCase().indexOf(search) >= 0) return true;
+      return o.productos.some(function(p){ return (p.nombre||'').toLowerCase().indexOf(search) >= 0; });
+    });
+  }
+
   if(!orders.length) {
-    document.getElementById('pedidos-content').innerHTML = '<div class="empty-msg">Sin pedidos' + (currentFilter !== 'todos' ? ' en este estado' : '. Sincroniza primero.') + '</div>';
+    document.getElementById('pedidos-content').innerHTML = '<div class="empty-msg">' + (search ? 'Sin resultados para "' + search + '"' : 'Sin pedidos' + (currentFilter !== 'todos' ? ' en este estado' : '. Sincroniza primero.')) + '</div>';
     return;
   }
 
@@ -588,6 +630,20 @@ function renderProveedores() {
     return;
   }
 
+  // Search filter: by vendor name or product name
+  var searchEl = document.getElementById('proveedores-search');
+  var search = searchEl ? searchEl.value.toLowerCase().trim() : '';
+  if(search) {
+    allVendors = allVendors.filter(function(vendor) {
+      if(vendor.toLowerCase().indexOf(search) >= 0) return true;
+      return (vendorData[vendor] || []).some(function(p){ return p.toLowerCase().indexOf(search) >= 0; });
+    });
+    if(!allVendors.length) {
+      document.getElementById('proveedores-content').innerHTML = '<div class="empty-msg">Sin resultados para "' + search + '"</div>';
+      return;
+    }
+  }
+
   var estadoColors = {'Pasar a buscar':'#f4a259','Vienen a dejar':'#5a8e7d','En bodega':'#a1ac6f','En riesgo':'#bd4a52','—':'#ccc'};
   var html = '';
 
@@ -669,7 +725,7 @@ function vienenVendorClick(v) {
   vendorMeta[v] = 'En bodega';
   gasPost({ action: 'saveVendorMeta', meta: vendorMeta }, function(){});
   renderResumen();
-  showToast('✓ ' + v + ' → En bodega');
+  showT('✓ ' + v + ' → En bodega');
 }
 
 // ── DARK / LIGHT MODE ────────────────────────────────

@@ -203,13 +203,20 @@ document.querySelectorAll('.tab').forEach(function(tab) {
 var uploadZone = document.getElementById('uploadZone');
 var fileInput  = document.getElementById('fileInput');
 
-uploadZone.addEventListener('click', function(){ fileInput.click(); });
+uploadZone.addEventListener('click', function(e){
+  if (uploadZone.classList.contains('loaded')) return; // no reabrir después de cargar
+  var t = e.target;
+  if (t.tagName === 'LABEL' || t.tagName === 'INPUT') return; // label ya lo maneja nativamente
+  fileInput.value = '';
+  fileInput.click();
+});
 uploadZone.addEventListener('dragover', function(e){ e.preventDefault(); uploadZone.classList.add('drag'); });
 uploadZone.addEventListener('dragleave', function(){ uploadZone.classList.remove('drag'); });
 uploadZone.addEventListener('drop', function(e){
   e.preventDefault(); uploadZone.classList.remove('drag');
   if (e.dataTransfer.files[0]) processCSV(e.dataTransfer.files[0]);
 });
+fileInput.addEventListener('click', function(){ this.value = ''; }); // permite re-seleccionar mismo archivo
 fileInput.addEventListener('change', function(){
   if (fileInput.files[0]) processCSV(fileInput.files[0]);
 });
@@ -218,7 +225,7 @@ function processCSV(file) {
   var reader = new FileReader();
   reader.onload = function(e) {
     var text = e.target.result;
-    var lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+    var lines = splitCSVLines(text.replace(/\r\n/g,'\n').replace(/\r/g,'\n'));
     var headers = parseCSVLine(lines[0]);
     var vendorIdx  = headers.indexOf('Vendor');
     var itemIdx    = headers.indexOf('Lineitem name');
@@ -253,8 +260,8 @@ function processCSV(file) {
     var meses   = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     var newFecha = dias[today.getDay()].charAt(0).toUpperCase()+dias[today.getDay()].slice(1)+' '+today.getDate()+' de '+meses[today.getMonth()]+', '+yy;
 
-    // Parse vendors
-    vendorData = {};
+    // Parse vendors (accumulate quantities per item)
+    var vdAccum = {}; // {vendor: {item: totalQty}}
     // Parse orders for paradas
     // NOTE: Shopify CSV only puts customer data on the first row per order
     // subsequent rows (one per line item) have blank shipping fields
@@ -269,9 +276,8 @@ function processCSV(file) {
       var oNum  = (cols[orderIdx]   || '').trim();
 
       if (v && item && v !== 'Vecinos' && item.toLowerCase() !== 'tip') {
-        if (!vendorData[v]) vendorData[v] = [];
-        var entry = qty + 'x ' + item;
-        if (vendorData[v].indexOf(entry) === -1) vendorData[v].push(entry);
+        if (!vdAccum[v]) vdAccum[v] = {};
+        vdAccum[v][item] = (vdAccum[v][item] || 0) + (parseInt(qty, 10) || 1);
       }
 
       if (!oNum || oNum[0] !== '#') continue;
@@ -309,6 +315,14 @@ function processCSV(file) {
 
       if (item && item.toLowerCase() !== 'tip') orders[oNum].items.push({ nombre:item, qty:qty, vendor:v });
     }
+
+    // Build vendorData from accumulator
+    vendorData = {};
+    Object.keys(vdAccum).forEach(function(vendor) {
+      vendorData[vendor] = Object.keys(vdAccum[vendor]).map(function(itemName) {
+        return vdAccum[vendor][itemName] + 'x ' + itemName;
+      });
+    });
 
     // Build paradas
     var PICKUP_POINTS = { 'la yunta':'La Yunta', 'café manduca':'Café Manduca', 'cafe manduca':'Café Manduca', 'laden market':'Laden Market' };
@@ -374,7 +388,11 @@ function processCSV(file) {
 
     rutaParadas = paradas;
     PARADAS = paradas; // actualizar tab Pedidos inmediatamente con los datos del CSV nuevo
-    if (prevRutaId !== newRutaId) prodOverrides = {}; // semana nueva → limpiar overrides viejos que contaminan ids reutilizados
+    prodOverrides = {}; // siempre limpiar al subir CSV — índices de productos pueden desincronizarse entre subidas
+    fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveProdOverrides', ruta_id:newRutaId, overrides:{} }) }).catch(function(){});
+    misiones = []; // nueva semana = misiones en blanco
+    renderMisiones();
+    fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify({ action:'saveMisiones', misiones:[], ruta_id:newRutaId }) }).catch(function(){});
     renderRutaList();
     showArchivoOk(file.name, newFecha);
     updateVendorSelect();
@@ -382,6 +400,18 @@ function processCSV(file) {
     showT('Cargando... ' + Object.keys(vendorData).length + ' productores');
   };
   reader.readAsText(file, 'UTF-8');
+}
+
+function splitCSVLines(text) {
+  var lines = [], cur = '', inQ = false;
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (c === '"') { inQ = !inQ; cur += c; }
+    else if (c === '\n' && !inQ) { lines.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  if (cur) lines.push(cur);
+  return lines;
 }
 
 function parseCSVLine(line) {
@@ -429,7 +459,7 @@ function renderProductorSection() {
     var productos = vendorData[v];
     html += '<div class="vm-prods">';
     productos.forEach(function(prod) {
-      var key = prod + '||' + v;
+      var key = prod.replace(/^\d+x /, '') + '||' + v;
       var meta = productMeta[key] || {};
       html += '<div class="vm-prod-row" data-key="' + key + '">';
       html += '<span class="vm-prod-name">' + prod + '</span>';

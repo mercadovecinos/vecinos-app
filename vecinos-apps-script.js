@@ -137,9 +137,7 @@ function saveNewRuta(data) {
 
   // Also save vendors
   saveVendors({ ruta_id:data.ruta_id, vendors:data.vendors });
-
-  // Clear old misiones for this ruta (fresh start)
-  saveMisiones({ ruta_id:data.ruta_id, misiones:[] });
+  // Note: misiones are NOT cleared here — admin clears them explicitly on CSV upload only
 }
 
 function getLatestConfig() {

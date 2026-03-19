@@ -332,18 +332,18 @@ function getVendorMetaSheet() {
 }
 
 function saveVendorMeta(data) {
-  // Clear-and-rewrite atómico: evita bugs de upsert con nombres duplicados/similares
   var sh  = getVendorMetaSheet();
   var n = sh.getLastRow();
-  if (n > 1) sh.deleteRows(2, n - 1);
+  // clearContent en lugar de deleteRows — Sheets no permite eliminar TODAS las filas no congeladas
+  if (n > 1) sh.getRange(2, 1, n - 1, 3).clearContent();
   var now = new Date().toISOString();
   var rows = Object.keys(data.meta).map(function(vendor) {
     return [vendor, data.meta[vendor], now];
   });
   if (rows.length > 0) {
     sh.getRange(2, 1, rows.length, 3).setValues(rows);
-    SpreadsheetApp.flush();
   }
+  SpreadsheetApp.flush();
   return {ok:true};
 }
 

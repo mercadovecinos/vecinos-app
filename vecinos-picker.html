@@ -429,9 +429,9 @@ function renderResumen() {
   if(vendorsVienen.length > 0) {
     html += '<div class="vienen-list"><div class="vienen-title">🚐 Vienen a dejar hoy</div>';
     vendorsVienen.forEach(function(v) {
-      var vk = JSON.stringify(v);
+      var vesc = v.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
       html += '<div class="vienen-vendor"><div class="vienen-dot"></div><span class="vienen-vname">' + v + '</span>';
-      html += '<select onchange="setVendorEstado(' + vk + ',this.value)" style="margin-left:auto;font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--gp);background:var(--bg-card);color:var(--ch);font-family:inherit">';
+      html += '<select data-v="' + vesc + '" onchange="setVendorEstado(this.dataset.v,this.value)" style="margin-left:auto;font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--gp);background:var(--bg-card);color:var(--ch);font-family:inherit">';
       html += '<option value="Vienen a dejar" selected>Vienen a dejar</option>';
       html += '<option value="En bodega">✓ En bodega</option>';
       html += '<option value="Pasar a buscar">Pasar a buscar</option>';
@@ -663,7 +663,8 @@ function renderProveedores() {
     var ESTADOS_LIST = ['—','Pasar a buscar','Vienen a dejar','En bodega','En riesgo'];
     html += '<div class="prov-header-title">';
     html += '<span class="prov-name">' + vendor + '</span>';
-    html += '<select onchange="setVendorEstado(' + JSON.stringify(vendor) + ',this.value)" style="font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid ' + color + '60;background:' + color + '15;color:' + color + ';font-family:inherit;font-weight:700">';
+    var vesc = vendor.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    html += '<select data-v="' + vesc + '" onchange="setVendorEstado(this.dataset.v,this.value)" style="font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid ' + color + '60;background:' + color + '15;color:' + color + ';font-family:inherit;font-weight:700">';
     ESTADOS_LIST.forEach(function(e){ html += '<option value="' + e + '"' + (e===estado?' selected':'') + '>' + e + '</option>'; });
     html += '</select>';
     html += '</div>';

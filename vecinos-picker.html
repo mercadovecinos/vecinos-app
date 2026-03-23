@@ -731,10 +731,28 @@ setInterval(pollOverrides, 90000); // Cada 90 segundos
 function setVendorEstado(v, estado) {
   if(!estado || estado === vendorMeta[v]) return;
   vendorMeta[v] = estado;
-  gasPost({ action: 'saveVendorMeta', meta: vendorMeta }, function(){});
   renderResumen();
   renderProveedores();
-  showT('✓ ' + v + ' → ' + estado);
+  showT('Guardando...');
+  gasPost({ action: 'saveVendorMeta', meta: vendorMeta }, function() {
+    // Verificar que GAS guardó correctamente (no-cors no da respuesta, usamos GET)
+    setTimeout(function() {
+      gasGet('vendorMeta', function(res) {
+        if(res && res.meta) {
+          if(res.meta[v] === estado) {
+            vendorMeta = res.meta;
+            showT('✓ ' + v + ' → ' + estado);
+          } else {
+            // GAS no guardó — mantener estado local y avisar
+            showT('⚠️ Error al guardar. Despliega GAS nueva versión.');
+            vendorMeta[v] = estado; // conservar cambio local
+          }
+          renderResumen();
+          renderProveedores();
+        }
+      });
+    }, 3000);
+  });
 }
 
 // ── DARK / LIGHT MODE ────────────────────────────────

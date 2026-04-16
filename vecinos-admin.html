@@ -1014,23 +1014,23 @@ function loadRutaFromConfig() {
 
 function resetTodo() {
   if (!confirm('\u00bfSeguro? Esto borra TODAS las paradas, misiones, km y progreso del d\u00eda actual. Esta acci\u00f3n no se puede deshacer.')) return;
+  showT('Borrando...');
+  // no-cors igual que los otros POSTs del admin — desde file:// CORS falla sin esto
   fetch(SCRIPT_URL, {
     method: 'POST',
+    mode: 'no-cors',
     body: JSON.stringify({ action: 'resetRuta', ruta_id: RUTA_ID })
-  }).then(function(r){ return r.json(); })
-  .then(function(res){
-    if (res.ok) {
-      misiones = []; vendorData = {}; vendorMeta = {}; productMeta = {};
-      prodOverrides = {}; PARADAS = []; rutaParadas = []; RUTA_ID = ''; FECHA = '';
-      _csvUploaded = false;
-      renderMisiones(); renderRutaList();
-      document.getElementById('archivoOk').style.display = 'none';
-      document.getElementById('uploadZone').classList.remove('loaded');
-      document.getElementById('uploadZone').querySelector('.upload-lbl').textContent = 'Sube el CSV de Shopify';
-      document.getElementById('uploadZone').querySelector('.upload-sub').textContent = 'Arrastra aqui o toca para seleccionar';
-      document.getElementById('fileInput').value = '';
-      showT('\u2713 Todo borrado. Listo para empezar de nuevo.');
-    } else { showT('Error al borrar'); }
+  }).then(function() {
+    misiones = []; vendorData = {}; vendorMeta = {}; productMeta = {};
+    prodOverrides = {}; PARADAS = []; rutaParadas = []; RUTA_ID = ''; FECHA = '';
+    _csvUploaded = false;
+    renderMisiones(); renderRutaList();
+    document.getElementById('archivoOk').style.display = 'none';
+    document.getElementById('uploadZone').classList.remove('loaded');
+    document.getElementById('uploadZone').querySelector('.upload-lbl').textContent = 'Sube el CSV de Shopify';
+    document.getElementById('uploadZone').querySelector('.upload-sub').textContent = 'Arrastra aqui o toca para seleccionar';
+    document.getElementById('fileInput').value = '';
+    showT('\u2713 Todo borrado. Listo para empezar de nuevo.');
   }).catch(function(){ showT('Error de conexion'); });
 }
 

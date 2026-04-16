@@ -1020,12 +1020,15 @@ function resetTodo() {
   }).then(function(r){ return r.json(); })
   .then(function(res){
     if (res.ok) {
-      misiones = []; vendorData = {}; PARADAS = []; rutaParadas = []; RUTA_ID = ''; FECHA = '';
+      misiones = []; vendorData = {}; vendorMeta = {}; productMeta = {};
+      prodOverrides = {}; PARADAS = []; rutaParadas = []; RUTA_ID = ''; FECHA = '';
+      _csvUploaded = false;
       renderMisiones(); renderRutaList();
       document.getElementById('archivoOk').style.display = 'none';
       document.getElementById('uploadZone').classList.remove('loaded');
       document.getElementById('uploadZone').querySelector('.upload-lbl').textContent = 'Sube el CSV de Shopify';
       document.getElementById('uploadZone').querySelector('.upload-sub').textContent = 'Arrastra aqui o toca para seleccionar';
+      document.getElementById('fileInput').value = '';
       showT('\u2713 Todo borrado. Listo para empezar de nuevo.');
     } else { showT('Error al borrar'); }
   }).catch(function(){ showT('Error de conexion'); });

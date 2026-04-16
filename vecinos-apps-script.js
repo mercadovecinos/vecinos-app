@@ -221,7 +221,8 @@ function resetRuta(data) {
   function clearSheet(s) {
     try {
       var n = s.getLastRow();
-      if (n > 1) s.deleteRows(2, n - 1);
+      // clearContent en lugar de deleteRows — Sheets no permite eliminar TODAS las filas no congeladas
+      if (n > 1) s.getRange(2, 1, n - 1, s.getLastColumn() || 1).clearContent();
     } catch(e) {}
   }
   var ss = SpreadsheetApp.openById(SHEET_ID);

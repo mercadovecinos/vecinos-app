@@ -69,9 +69,12 @@ input:checked+.theme-slider:before{transform:translateX(16px)}
 .sinfo{flex:1;min-width:0}
 .stag{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:4px 12px;border-radius:14px;display:inline-block;margin-bottom:6px}
 .tt{background:var(--gl);color:var(--gd)}.te{background:#d4edda;color:#1a5e2e}.tr{background:var(--pc);color:#7a4500}
-.sname{font-weight:800;font-size:22px;color:var(--ch);line-height:1.2}
-.saddr{font-size:15px;color:var(--gm);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.sname{font-weight:800;font-size:18px;color:var(--ch);line-height:1.2}
+.saddr{font-size:14px;color:var(--gm);margin-top:5px;font-weight:500;word-break:break-word}
 .sact{display:flex;gap:10px;flex-shrink:0}
+.sreorder{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.smv{width:22px;height:22px;border-radius:6px;border:none;background:var(--gp);color:var(--gd);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0}
+.smv:active{background:var(--gm);color:white}
 .bic{width:54px;height:54px;border-radius:15px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700}
 .bic:active{transform:scale(.88)}
 .bm{background:var(--gl);color:var(--gd)}.bc{background:var(--pc)}.bd{background:var(--gp);color:var(--gd)}.bd.on{background:var(--ol);color:white}
@@ -156,6 +159,16 @@ input:checked+.theme-slider:before{transform:translateX(16px)}
 .tag-c{background:#dbeafe;color:#3b82f6}
 .tag-r{background:#fce7f3;color:#ec4899}
 .tag-nota{background:#fef9c3;color:#854d0e;font-weight:600}
+.tag-vienen{background:#e8f4f8;color:#2471a3}
+.tag-buscar{background:#fff3e0;color:#d35400}
+.tag-riesgo{background:#fde8e8;color:#c0392b}
+@media(max-width:400px){
+  .bic{width:44px;height:44px;font-size:18px}
+  .snum{width:42px;height:42px;font-size:17px}
+  .shdr{gap:8px;padding:14px 10px}
+  .sact{gap:6px}
+  .sname{font-size:16px}
+}
 /* DARK MODE */
 @media(prefers-color-scheme:dark){
   :root{--bg:#111a11;--bg-card:#1b251b;--ch:#d8ead8;--gl:#1e3028;--gp:#1a2e1a;--pc:#2e1d08}
@@ -685,7 +698,7 @@ function updateInicio() {
     mHtml = '<div class="ini-card"><div class="ini-card-title">🎯 Misiones de hoy</div>';
     misionesData.forEach(function(m, i) {
       var ok = !!misionesDone[i];
-      mHtml += '<div class="ini-mis-item">'
+      mHtml += '<div class="ini-mis-item" onclick="showScr(\'mis\')" style="cursor:pointer">'
         + '<div class="ini-mis-dot" style="background:' + (ok ? 'var(--ol)' : '#bd4a52') + '"></div>'
         + '<div><div style="font-weight:700;color:var(--ch);font-size:15px">' + (ok ? '<s>' : '') + (m.nombre || '') + (ok ? '</s>' : '') + '</div>'
         + (m.mision ? '<div style="font-size:13px;color:var(--gm);margin-top:2px">' + m.mision + '</div>' : '')
@@ -752,7 +765,10 @@ function renderRuta() {
     card.className = 'scard' + (isDone ? ' done' : '') + (tClass ? ' ' + tClass : '');
     var ph = (p.telefono || '').split(',')[0];
     var phBtn = ph ? '<button class="bic bc" data-tel="' + ph + '">📞</button>' : '';
-    card.innerHTML = '<div class="shdr" data-id="' + p.id + '"><div class="snum">' + (isDone ? '✓' : stopNum) + '</div><div class="sinfo">' + tag + '<div class="sname">' + (p.nombre || '') + '</div><div class="saddr">' + (p.direccion || '') + '</div></div><div class="sact"><button class="bic bm" data-map="' + p.mapUrl + '">🗺</button>' + phBtn + '<button class="bic bd' + (isDone ? ' on' : '') + '" data-done="' + p.id + '">OK</button></div></div><div class="sbody" id="b' + p.id + '">' + body + '</div>';
+    var rIdx = stopNum - 1;
+    var upBtn = rIdx > 0 ? '<button class="smv" data-move="-1" data-idx="' + rIdx + '">▲</button>' : '<div style="width:22px;height:22px"></div>';
+    var dnBtn = rIdx < PARADAS.length - 1 ? '<button class="smv" data-move="1" data-idx="' + rIdx + '">▼</button>' : '<div style="width:22px;height:22px"></div>';
+    card.innerHTML = '<div class="shdr" data-id="' + p.id + '"><div class="sreorder">' + upBtn + dnBtn + '</div><div class="snum">' + (isDone ? '✓' : stopNum) + '</div><div class="sinfo">' + tag + '<div class="sname">' + (p.nombre || '') + '</div><div class="saddr">' + (p.direccion || '') + '</div></div><div class="sact"><button class="bic bm" data-map="' + p.mapUrl + '">🗺</button>' + phBtn + '<button class="bic bd' + (isDone ? ' on' : '') + '" data-done="' + p.id + '">OK</button></div></div><div class="sbody" id="b' + p.id + '">' + body + '</div>';
     list.appendChild(card);
   });
   document.getElementById('sProds').textContent = totP;
@@ -762,6 +778,14 @@ function renderRuta() {
 function syncStop(id, completado) {
   var p = PARADAS.find(function(x){ return x.id === id; }); if (!p) return;
   gasPost({action:'update', ruta_id:RUTA_ID, parada_id:id, nombre:p.nombre||'', tipo:p.tipo, fecha:FECHA, estado:completado?'completado':'pendiente'});
+}
+
+function moveStop(idx, dir) {
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= PARADAS.length) return;
+  var tmp = PARADAS[idx]; PARADAS[idx] = PARADAS[newIdx]; PARADAS[newIdx] = tmp;
+  renderRuta();
+  saveCache();
 }
 
 function updP() {
@@ -776,6 +800,7 @@ function updP() {
 
 // Route click delegation
 document.addEventListener('click', function(e) {
+  var mv = e.target.closest('[data-move]'); if (mv) { e.stopPropagation(); moveStop(parseInt(mv.dataset.idx), parseInt(mv.dataset.move)); return; }
   var m = e.target.closest('[data-map]'); if (m) { e.stopPropagation(); window.open(m.dataset.map, '_blank'); return; }
   var tel = e.target.closest('[data-tel]'); if (tel) { e.stopPropagation(); window.location.href = 'tel:' + tel.dataset.tel; return; }
   var dn = e.target.closest('[data-done]');
@@ -869,6 +894,12 @@ function getProdTags(prod) {
   if (meta.c) tags += '<span class="tag tag-c">❄ Congelar</span> ';
   if (meta.r) tags += '<span class="tag tag-r">❄ Refrigerar</span> ';
   if (meta.nota) tags += '<span class="tag tag-nota">📋 ' + meta.nota + '</span>';
+  if (vendor) {
+    var vs = vendorMeta[vendor];
+    if (vs === 'Vienen a dejar') tags += ' <span class="tag tag-vienen">🚐 Vienen a dejar</span>';
+    else if (vs === 'Pasar a buscar') tags += ' <span class="tag tag-buscar">🚗 Pasar a buscar</span>';
+    else if (vs === 'En riesgo') tags += ' <span class="tag tag-riesgo">⚠ En riesgo</span>';
+  }
   return tags;
 }
 
